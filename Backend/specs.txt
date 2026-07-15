@@ -1,0 +1,365 @@
+const userSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true, lowercase: true, index: true },
+  password: { type: String, required: true }, // bcrypt hashed
+  role: { 
+    type: String, 
+    enum: ['student', 'operations'], 
+    required: true 
+  },
+  isActive: { type: Boolean, default: true },
+  lastLogin: { type: Date },
+
+  // For Students
+  profile: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'StudentProfile'
+  },
+
+  // Common fields
+  name: { type: String, trim: true },
+}, { timestamps: true });
+
+userSchema.index({ email: 1, role: 1 });
+
+
+
+
+const studentProfileSchema = new mongoose.Schema({
+  user: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User', 
+    required: true, 
+    unique: true 
+  },
+
+  // Personal Details
+  name: { type: String, required: true },
+  dob: { type: Date },
+  gender: { type: String, enum: ['Male', 'Female', 'Other'] },
+  mobile: { type: String },
+  address: { type: String },
+  profilePhoto: { type: String }, // URL
+
+  // Education
+  education: {
+    tenth: { percentage: Number, year: Number, board: String },
+    twelfth: { percentage: Number, year: Number, board: String },
+    diploma: { /* similar */ },
+    graduation: {
+      college: String,
+      university: String,
+      branch: String,
+      cgpa: Number,
+      percentage: Number,
+      passingYear: Number
+    },
+    postGraduation: { /* similar */ }
+  },
+
+  academicDetails: {
+    college: String,
+    university: String,
+    branch: String,
+    cgpa: Number,
+    percentage: Number,
+    passingYear: Number,
+    placementEligibility: Boolean,
+    activeBacklogs: Number,
+    totalBacklogs: Number
+  },
+
+  // Skills & Experience
+  technicalSkills: [{ type: String, index: true }],
+  softSkills: [{ type: String }],
+  languages: [{ language: String, proficiency: String }],
+  projects: [{
+    title: String,
+    description: String,
+    technologies: [String],
+    link: String
+  }],
+  internships: [{
+    company: String,
+    role: String,
+    duration: String,
+    description: String
+  }],
+  achievements: [String],
+  certifications: [{
+    name: String,
+    issuer: String,
+    date: Date,
+    link: String
+  }],
+
+  resume: { type: String }, // URL
+  socialLinks: {
+    github: String,
+    linkedin: String,
+    portfolio: String
+  },
+
+  preferredLocation: [String],
+  expectedSalary: Number,
+  currentStatus: { 
+    type: String, 
+    enum: ['Available', 'Placed', 'Not Looking'] 
+  },
+
+  // For Operations filters
+  subscriptionStatus: { type: String, default: 'free' },
+}, { timestamps: true });
+
+studentProfileSchema.index({ 'academicDetails.cgpa': 1, 'academicDetails.branch': 1 });
+studentProfileSchema.index({ technicalSkills: 1 }); // For array search
+
+
+
+
+
+const companySchema = new mongoose.Schema({
+  name: { type: String, required: true, unique: true },
+  industry: String,
+  address: String,
+  locations: [String],
+  website: String,
+  logo: String, // URL
+  description: String,
+  documents: [String], // URLs
+  contactPerson: {
+    name: String,
+    email: String,
+    phone: String
+  },
+  isActive: { type: Boolean, default: true },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Operations
+}, { timestamps: true });
+
+companySchema.index({ name: 1, industry: 1 });
+
+
+
+
+const jobOpeningSchema = new mongoose.Schema({
+  company: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Company', 
+    required: true 
+  },
+  title: { type: String, required: true }, // Role
+  description: String,
+  location: [String],
+  skills: [{ type: String, index: true }],
+  experience: Number, // min years
+  salary: {
+    min: Number,
+    max: Number
+  },
+  jobType: { 
+    type: String, 
+    enum: ['Full-time', 'Internship', 'Part-time', 'Contract'] 
+  },
+  vacancies: { type: Number, default: 1 },
+  eligibility: {
+    minCGPA: Number,
+    branches: [String],
+    passingYear: [Number]
+  },
+  status: { 
+    type: String, 
+    enum: ['Open', 'Closed', 'Draft'], 
+    default: 'Open' 
+  },
+  postedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Operations
+  applicationDeadline: Date,
+}, { timestamps: true });
+
+jobOpeningSchema.index({ skills: 1, location: 1, 'salary.min': 1 });
+
+
+
+
+
+const applicationSchema = new mongoose.Schema({
+  student: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User', 
+    required: true 
+  },
+  job: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'JobOpening', 
+    required: true 
+  },
+  resumeUsed: String, // URL at time of apply
+  status: { 
+    type: String, 
+    enum: ['Applied', 'Under Review', 'Shortlisted', 'Selected', 'Rejected', 'Withdrawn'], 
+    default: 'Applied' 
+  },
+  appliedAt: { type: Date, default: Date.now },
+  updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Operations
+  notes: [{
+    text: String,
+    updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    date: Date
+  }]
+}, { timestamps: true });
+
+// Prevent duplicate applications
+applicationSchema.index({ student: 1, job: 1 }, { unique: true });
+
+
+
+
+
+
+
+**All APIs for the Placement Portal Project**  
+(Complete API List – Following the Architecture Blueprint)
+
+---
+
+### **Base URL**: `/api`
+
+---
+
+### 1. Auth APIs
+
+| Method | Endpoint                        | Description                        | Access     | Protected |
+|--------|---------------------------------|------------------------------------|------------|---------|
+| POST   | `/auth/register`                | Student Registration               | Public     | No |
+| POST   | `/auth/login`                   | Login (Student & Operations)       | Public     | No |
+| POST   | `/auth/refresh-token`           | Refresh JWT Token                  | Protected  | Yes |
+| POST   | `/auth/logout`                  | Logout                             | Protected  | Yes |
+
+---
+
+### 2. Student APIs
+
+#### **Profile**
+| Method | Endpoint                    | Description                        | Access    |
+|--------|-----------------------------|------------------------------------|-----------|
+| GET    | `/profile/me`               | Get Student Profile                | Student   |
+| PUT    | `/profile/me`               | Update Complete Profile            | Student   |
+| PATCH  | `/profile/photo`            | Upload Profile Photo               | Student   |
+| PATCH  | `/profile/resume`           | Upload/Update Resume               | Student   |
+
+#### **Job Openings**
+| Method | Endpoint                        | Description                        | Access    |
+|--------|---------------------------------|------------------------------------|-----------|
+| GET    | `/jobs/openings`                | List Openings (Search/Filter/Sort) | Student   |
+| GET    | `/jobs/openings/:id`            | View Job Details                   | Student   |
+| POST   | `/jobs/apply/:jobId`            | Apply to Job                       | Student   |
+
+#### **Applied Jobs**
+| Method | Endpoint                          | Description                        | Access    |
+|--------|-----------------------------------|------------------------------------|-----------|
+| GET    | `/applications/my`                | Get My Applications                | Student   |
+| GET    | `/applications/my/:id`            | View Application Detail            | Student   |
+| POST   | `/applications/:id/withdraw`      | Withdraw Application               | Student   |
+
+#### **Dashboard**
+| Method | Endpoint                  | Description                        | Access    |
+|--------|---------------------------|------------------------------------|-----------|
+| GET    | `/dashboard/student`      | Student Dashboard (glance)         | Student   |
+
+---
+
+### 3. Operations (Admin) APIs
+
+#### **Dashboard**
+| Method | Endpoint                    | Description                        | Access       |
+|--------|-----------------------------|------------------------------------|--------------|
+| GET    | `/ops/dashboard`            | Operations Dashboard               | Operations   |
+
+#### **Student Management**
+| Method | Endpoint                          | Description                        | Access       |
+|--------|-----------------------------------|------------------------------------|--------------|
+| GET    | `/ops/students`                   | List Students + Filters            | Operations   |
+| GET    | `/ops/students/:id`               | Get Student Detail                 | Operations   |
+| PUT    | `/ops/students/:id`               | Edit Student Profile               | Operations   |
+| PATCH  | `/ops/students/:id/disable`       | Disable Student                    | Operations   |
+| DELETE | `/ops/students/:id`               | Delete Student                     | Operations   |
+| GET    | `/ops/students/:id/resume`        | Download Resume                    | Operations   |
+| GET    | `/ops/students/export`            | Export Students to Excel           | Operations   |
+
+#### **Company Management**
+| Method | Endpoint                        | Description                        | Access       |
+|--------|---------------------------------|------------------------------------|--------------|
+| GET    | `/ops/companies`                | List Companies                     | Operations   |
+| POST   | `/ops/companies`                | Add New Company                    | Operations   |
+| GET    | `/ops/companies/:id`            | Get Company Detail                 | Operations   |
+| PUT    | `/ops/companies/:id`            | Update Company                     | Operations   |
+| DELETE | `/ops/companies/:id`            | Delete Company                     | Operations   |
+| PATCH  | `/ops/companies/:id/toggle`     | Activate/Deactivate                | Operations   |
+| GET    | `/ops/companies/export`         | Export Companies to Excel          | Operations   |
+
+#### **Job Opening Management**
+| Method | Endpoint                              | Description                        | Access       |
+|--------|---------------------------------------|------------------------------------|--------------|
+| GET    | `/ops/jobs`                           | List All Openings                  | Operations   |
+| POST   | `/ops/jobs`                           | Create New Opening                 | Operations   |
+| GET    | `/ops/jobs/:id`                       | Get Job Detail                     | Operations   |
+| PUT    | `/ops/jobs/:id`                       | Update Job                         | Operations   |
+| DELETE | `/ops/jobs/:id`                       | Delete Job                         | Operations   |
+| PATCH  | `/ops/jobs/:id/close`                 | Close Opening                      | Operations   |
+| PATCH  | `/ops/jobs/:id/reopen`                | Reopen Opening                     | Operations   |
+| POST   | `/ops/jobs/:id/duplicate`             | Duplicate Opening                  | Operations   |
+| GET    | `/ops/jobs/:id/applicants`            | View Applicants                    | Operations   |
+| GET    | `/ops/jobs/export`                    | Export All Jobs                    | Operations   |
+
+#### **Applied Students / Applications**
+| Method | Endpoint                                | Description                        | Access       |
+|--------|-----------------------------------------|------------------------------------|--------------|
+| GET    | `/ops/applications`                     | List All Applications + Filters    | Operations   |
+| GET    | `/ops/applications/:id`                 | Get Application Detail             | Operations   |
+| PATCH  | `/ops/applications/:id/status`          | Change Status (Shortlist/Select/Reject) | Operations |
+| GET    | `/ops/applications/export`              | Export Applications to Excel       | Operations   |
+| GET    | `/ops/applications/:id/resume`          | Download Applicant Resume          | Operations   |
+
+---
+
+### 4. Common / Shared APIs
+
+| Method | Endpoint                    | Description                        | Access          |
+|--------|-----------------------------|------------------------------------|-----------------|
+| GET    | `/companies/public`         | Public Company List (for students) | Public/Student  |
+| GET    | `/jobs/public`              | Public Open Jobs                   | Public/Student  |
+
+---
+
+### 5. Request/Response Standards
+
+**Success Response**:
+```json
+{
+  "success": true,
+  "message": "Profile updated successfully",
+  "data": { ... },
+  "statusCode": 200
+}
+```
+
+**Paginated Response**:
+```json
+{
+  "success": true,
+  "total": 45,
+  "page": 1,
+  "limit": 10,
+  "data": [],
+  "statusCode": 200
+}
+```
+
+**Error Response**:
+```json
+{
+  "success": false,
+  "message": "Validation failed",
+  "statusCode": 422
+}
+```
+
+---
