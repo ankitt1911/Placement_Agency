@@ -4,7 +4,7 @@ import store from "../ReduxStore/store";
 import { logout } from "../ReduxFeature/Authenthicate/LoginSlice";
 
 const ApiRequest = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api",
+  baseURL:"https://placement-agency.onrender.com/api",
   timeout: 20000
 });
 
