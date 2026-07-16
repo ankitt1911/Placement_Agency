@@ -18,6 +18,7 @@ import OpenLinkApplicationPage from "./pages/openLinkApplicationPage";
 import ProfilePage from "./pages/profile/profilePage";
 import StudentAppliedJobsPage from "./pages/studentAppliedJobs/studentAppliedJobsPage";
 import StudentOpeningsPage from "./pages/studentOpenings/studentOpeningsPage";
+import IssuesPage from "./pages/issues/issuesPage";
 
 function RootRedirect() {
   const { isAuthenticated, role, isAuthChecked } = useSelector((state) => state.auth);
@@ -53,6 +54,7 @@ export default function App() {
             <Route path="/student/profile" element={<ProfilePage />} />
             <Route path="/student/openings" element={<StudentOpeningsPage />} />
             <Route path="/student/applied-jobs" element={<StudentAppliedJobsPage />} />
+            <Route path="/student/issues" element={<IssuesPage />} />
           </Route>
         </Route>
         <Route element={<ProtectedLayout allowedRole="operations" />}>
@@ -63,6 +65,7 @@ export default function App() {
             <Route path="/operations/job-openings" element={<JobOpeningManagementPage />} />
             <Route path="/operations/applied-students" element={<AppliedStudentsPage />} />
             <Route path="/operations/open-link-applications" element={<AppliedStudentsPage openLinkOnly />} />
+            <Route path="/operations/issues" element={<IssuesPage />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to={isAuthenticated && roleHome[role] ? roleHome[role] : "/login"} replace />} />

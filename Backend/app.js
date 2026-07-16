@@ -17,6 +17,7 @@ const companyRouter = require("./router/companyRoutes");
 const opsStudentRouter = require("./router/opsStudentRoutes");
 const opsJobRouter = require("./router/opsJobRoutes");
 const opsApplicationRouter = require("./router/opsApplicationRoutes");
+const issueRouter = require("./router/issueRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -44,6 +45,7 @@ app.use("/api/ops/students", opsStudentRouter);
 app.use("/api/ops/jobs", opsJobRouter);
 app.use("/api/ops/applications", opsApplicationRouter);
 app.use("/api/ops/dashboard", dashboardRouter);
+app.use("/api/issues", issueRouter);
 
 app.use((req, res) => {
   res.status(404).json({ success: false, message: "Route not found", statusCode: 404 });

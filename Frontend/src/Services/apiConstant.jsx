@@ -56,5 +56,9 @@ export const apiConstant = {
   getApplicantDetails: (id) => `/ops/applications/${id}`,
   changeApplicantStatus: (id) => `/ops/applications/${id}/status`,
   downloadApplicantResume: (id) => `/ops/applications/${id}/resume`,
-  exportApplicantsExcel: "/ops/applications/export"
+  exportApplicantsExcel: "/ops/applications/export",
+  getMyIssues: "/issues/my",
+  getRaisedIssues: "/issues/raised",
+  createIssue: "/issues",
+  updateIssueStatus: (id) => `/issues/${id}/status`
 };

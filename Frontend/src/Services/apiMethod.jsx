@@ -66,3 +66,8 @@ export const GetApplicantDetailsApi = (id) => apiRequest(apiConstant.getApplican
 export const ChangeApplicantStatusApi = (id, params) => apiRequest(apiConstant.changeApplicantStatus(id), "Patch", params, true);
 export const DownloadApplicantResumeApi = (id) => apiRequest(apiConstant.downloadApplicantResume(id), "Get", {}, false, {}, "blob");
 export const ExportApplicantsExcelApi = (params) => apiRequest(apiConstant.exportApplicantsExcel, "Get", params, false, {}, "blob");
+
+export const GetMyIssuesApi = (params) => apiRequest(apiConstant.getMyIssues, "Get", params);
+export const GetRaisedIssuesApi = (params) => apiRequest(apiConstant.getRaisedIssues, "Get", params);
+export const CreateIssueApi = (params) => apiRequest(apiConstant.createIssue, "Post", params, true);
+export const UpdateIssueStatusApi = (id, params) => apiRequest(apiConstant.updateIssueStatus(id), "Patch", params, true);

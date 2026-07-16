@@ -120,6 +120,22 @@ export const mapStudent = (profile = {}) => ({
   resume: profile.resume || "resume.pdf"
 });
 
+export const mapIssue = (issue = {}) => ({
+  ...issue,
+  id: issue._id || issue.id,
+  subject: issue.subject || "",
+  description: issue.description || "",
+  priority: issue.priority || "Medium",
+  status: issue.status || "Open",
+  raisedByName: issue.raisedBy?.name || issue.raisedBy?.email || "",
+  raisedByEmail: issue.raisedBy?.email || "",
+  raisedByRole: issue.raisedBy?.role || "",
+  closedByName: issue.closedBy?.name || issue.closedBy?.email || "",
+  createdDate: (issue.createdAt || "").slice(0, 10),
+  updatedDate: (issue.updatedAt || "").slice(0, 10),
+  closedDate: (issue.closedAt || "").slice(0, 10)
+});
+
 export const mapProfileToUi = (profile = {}) => ({
   personal: {
     name: profile.name || profile.user?.name || "",
