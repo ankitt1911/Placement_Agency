@@ -59,10 +59,24 @@ export default function Profile() {
   const validate = () => {
     const next = {
       name: isRequired(profile.personal.name, "Name"),
-      email: isEmail(profile.personal.email),
-      mobile: isMobile(profile.personal.mobile),
-      cgpa: isCgpa(profile.academic.cgpa),
-      percentage: isPercentage(profile.academic.percentage),
+      dob: isRequired(profile.personal.dob, "Date of birth"),
+      gender: isRequired(profile.personal.gender, "Gender"),
+      email: isRequired(profile.personal.email, "Email") || isEmail(profile.personal.email),
+      mobile: isRequired(profile.personal.mobile, "Mobile") || isMobile(profile.personal.mobile),
+      address: isRequired(profile.personal.address, "Address"),
+      college: isRequired(profile.academic.college, "College"),
+      university: isRequired(profile.academic.university, "University"),
+      branch: isRequired(profile.academic.branch, "Branch"),
+      passingYear: isRequired(profile.academic.passingYear, "Passing year"),
+      cgpa: isRequired(profile.academic.cgpa, "CGPA") || isCgpa(profile.academic.cgpa),
+      percentage: isRequired(profile.academic.percentage, "Percentage") || isPercentage(profile.academic.percentage),
+      totalBacklogs: isRequired(profile.academic.totalBacklogs, "Total backlogs"),
+      activeBacklogs: isRequired(profile.academic.activeBacklogs, "Active backlogs"),
+      tenth: isRequired(profile.education.tenth, "10th details"),
+      twelfth: isRequired(profile.education.twelfth, "12th details"),
+      graduation: isRequired(profile.education.graduation, "Graduation details"),
+      technicalSkills: isRequired(profile.skills.technicalSkills, "Technical skills"),
+      languages: isRequired(profile.skills.languages, "Languages"),
       portfolio: isUrl(profile.links.portfolio),
       github: isUrl(profile.links.github),
       linkedin: isUrl(profile.links.linkedin),
@@ -76,8 +90,10 @@ export default function Profile() {
     if (!validate()) return;
     setSaving(true);
     try {
-      await handleUpdateProfile(profile);
+      const updatedProfile = await handleUpdateProfile(profile);
+      if (!updatedProfile) return;
       SuccessMessage("Profile saved");
+      globalThis.dispatchEvent(new globalThis.Event("student-profile-updated"));
     } finally {
       setSaving(false);
     }

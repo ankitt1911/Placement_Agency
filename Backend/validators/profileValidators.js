@@ -31,4 +31,35 @@ const updateProfileSchema = Joi.object({
   }),
 }).min(1);
 
-module.exports = { updateProfileSchema };
+const requiredEducation = Joi.object({
+  tenth: Joi.object().min(1).required(),
+  twelfth: Joi.object().min(1).required(),
+  diploma: Joi.object(),
+  graduation: Joi.object().min(1).required(),
+  postGraduation: Joi.object(),
+}).unknown(true).required();
+
+const requiredAcademics = Joi.object({
+  college: Joi.string().trim().required(),
+  university: Joi.string().trim().required(),
+  branch: Joi.string().trim().required(),
+  passingYear: Joi.number().required(),
+  cgpa: Joi.number().min(0).max(10).required(),
+  percentage: Joi.number().min(0).max(100).required(),
+  totalBacklogs: Joi.number().min(0).required(),
+  activeBacklogs: Joi.number().min(0).required(),
+}).unknown(true).required();
+
+const completeProfileSchema = updateProfileSchema.keys({
+  name: Joi.string().trim().required(),
+  dob: Joi.date().required(),
+  gender: Joi.string().valid("Male", "Female", "Other").required(),
+  mobile: Joi.string().pattern(/^[0-9]{10}$/).required(),
+  address: Joi.string().trim().required(),
+  education: requiredEducation,
+  academicDetails: requiredAcademics,
+  technicalSkills: Joi.array().items(Joi.string()).min(1).required(),
+  languages: Joi.array().items(looseObject).min(1).required(),
+});
+
+module.exports = { updateProfileSchema, completeProfileSchema };

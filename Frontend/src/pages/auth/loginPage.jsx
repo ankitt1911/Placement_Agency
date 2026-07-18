@@ -30,7 +30,7 @@ export default function LoginPage() {
       }
       dispatch(login(response));
       SuccessMessage("Logged in successfully");
-      navigate(response.user.role === "operations" ? "/operations/dashboard" : "/student/dashboard", { replace: true });
+      navigate(response.user.role === "operations" ? "/operations/dashboard" : "/student/profile", { replace: true });
     } finally {
       setLoading(false);
     }
