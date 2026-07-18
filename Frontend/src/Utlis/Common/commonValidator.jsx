@@ -1,5 +1,7 @@
 export const isRequired = (value, label = "Field") => {
-  if (value === null || value === undefined || String(value).trim() === "") {
+  const emptyObject = value && typeof value === "object" && !Array.isArray(value)
+    && !Object.values(value).some((item) => item !== null && item !== undefined && String(item).trim() !== "");
+  if (value === null || value === undefined || String(value).trim() === "" || emptyObject) {
     return `${label} is required`;
   }
   return "";

@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import AppSidenav from "./AppSidenav";
 
-export default function AppSidedrawer({ open, onClose, role }) {
+export default function AppSidedrawer({ open, onClose, role, profileComplete, onBlockedNavigation }) {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-40 lg:hidden">
@@ -10,7 +10,7 @@ export default function AppSidedrawer({ open, onClose, role }) {
         <button className="absolute right-3 top-3 rounded-md p-2 text-slate-500 hover:bg-slate-100" onClick={onClose} aria-label="Close">
           <X className="h-5 w-5" />
         </button>
-        <AppSidenav role={role} mobile />
+        <AppSidenav role={role} mobile profileComplete={profileComplete} onBlockedNavigation={onBlockedNavigation} />
       </div>
     </div>
   );

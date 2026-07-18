@@ -21,6 +21,18 @@ const salaryLabel = (salary) => {
   return (max || min || "").toLocaleString();
 };
 const numberOrUndefined = (value) => value === "" || value === null || value === undefined ? undefined : Number(value);
+const educationToText = (value, fields) => {
+  if (!value || typeof value !== "object") return value || "";
+  return fields.map((field) => value[field]).filter((item) => item !== "" && item !== null && item !== undefined).join(", ");
+};
+const educationToObject = (value, fields) => {
+  if (!value || typeof value === "object") return value || undefined;
+  const parts = String(value).split(",").map((item) => item.trim());
+  return fields.reduce((result, field, index) => {
+    if (parts[index]) result[field] = ["year", "passingYear", "percentage", "cgpa"].includes(field) ? Number(parts[index]) : parts[index];
+    return result;
+  }, {});
+};
 const activeApplicationStatuses = ["Applied", "Under Review", "Shortlisted", "Selected", "Rejected"];
 const isActiveApplicationStatus = (status) => activeApplicationStatuses.includes(status);
 
@@ -145,7 +157,13 @@ export const mapProfileToUi = (profile = {}) => ({
     mobile: profile.mobile || "",
     address: profile.address || ""
   },
-  education: profile.education || {},
+  education: {
+    tenth: educationToText(profile.education?.tenth, ["board", "year", "percentage"]),
+    twelfth: educationToText(profile.education?.twelfth, ["board", "year", "percentage"]),
+    diploma: educationToText(profile.education?.diploma, ["college", "branch", "cgpa"]),
+    graduation: educationToText(profile.education?.graduation, ["college", "branch", "cgpa"]),
+    postGraduation: educationToText(profile.education?.postGraduation, ["college", "branch", "cgpa"])
+  },
   academic: profile.academicDetails || {},
   skills: {
     technicalSkills: join(profile.technicalSkills),
@@ -184,10 +202,20 @@ export const mapProfileToApi = (profile = {}) => ({
   gender: profile.personal?.gender,
   mobile: profile.personal?.mobile,
   address: profile.personal?.address,
-  education: profile.education,
+  education: {
+    tenth: educationToObject(profile.education?.tenth, ["board", "year", "percentage"]),
+    twelfth: educationToObject(profile.education?.twelfth, ["board", "year", "percentage"]),
+    diploma: educationToObject(profile.education?.diploma, ["college", "branch", "cgpa"]),
+    graduation: educationToObject(profile.education?.graduation, ["college", "branch", "cgpa"]),
+    postGraduation: educationToObject(profile.education?.postGraduation, ["college", "branch", "cgpa"])
+  },
   academicDetails: profile.academic,
   technicalSkills: split(profile.skills?.technicalSkills),
   softSkills: split(profile.skills?.softSkills),
+  languages: split(profile.skills?.languages).map((item) => {
+    const [language, proficiency = ""] = item.split("-").map((part) => part.trim());
+    return { language, proficiency };
+  }),
   achievements: split(profile.experience?.achievements),
   totalExperience: numberOrUndefined(profile.experience?.totalExperience),
   projects: profile.experience?.projects || [],
