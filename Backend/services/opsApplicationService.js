@@ -2,6 +2,7 @@ const path = require("path");
 const Application = require("../models/applicationModel");
 const StudentProfile = require("../models/studentProfileModel");
 const { exportExcel } = require("../utils/exportExcel");
+const { parseSearchTerms } = require("../utils/searchUtils");
 
 const requireOps = (req, res) => req.user.role === "operations" || (res.status(403).json({ success: false, message: "Access denied", statusCode: 403 }), false);
 const compactOptions = (values) => [...new Set(values.flat().filter(Boolean).map(String))].sort();
@@ -117,7 +118,7 @@ const fetchGetApplications = async (req, res) => {
   if (req.query.appliedFromOpenLink !== undefined) query.appliedFromOpenLink = String(req.query.appliedFromOpenLink) === "true";
   const applications = await Application.find(query).populate("student", "name email").populate({ path: "job", populate: { path: "company", select: "name locations" } }).sort({ appliedAt: -1 }).lean();
   const enriched = await withStudentProfiles(applications);
-  const search = String(req.query.search || "").toLowerCase();
+  const searchTerms = parseSearchTerms(req.query.search).map((term) => term.toLowerCase());
   const filtered = enriched
     .filter((application) => !req.query.company || String(application.job && application.job.company && application.job.company._id) === String(req.query.company))
     .filter((application) => !req.query.college || String(application.student && application.student.academicDetails && application.student.academicDetails.college) === String(req.query.college))
@@ -127,14 +128,14 @@ const fetchGetApplications = async (req, res) => {
       const jobLocations = (application.job && application.job.location) || [];
       return [...companyLocations, ...jobLocations].includes(req.query.location);
     })
-    .filter((application) => !search || [
+    .filter((application) => searchTerms.every((term) => [
       application.student && application.student.name,
       application.student && application.student.email,
       application.student && application.student.academicDetails && application.student.academicDetails.college,
       application.student && joinList(application.student.technicalSkills),
       application.job && application.job.title,
       application.job && application.job.company && application.job.company.name,
-    ].some((value) => String(value || "").toLowerCase().includes(search)));
+    ].some((value) => String(value || "").toLowerCase().includes(term))));
   const data = filtered.slice((page - 1) * limit, page * limit);
   return res.status(200).json({ success: true, total: filtered.length, page, limit, data, statusCode: 200 });
 };
@@ -187,7 +188,7 @@ const fetchExportApplications = async (req, res) => {
   if (req.query.appliedFromOpenLink !== undefined) query.appliedFromOpenLink = String(req.query.appliedFromOpenLink) === "true";
   const applications = await Application.find(query).populate("student", "name email").populate({ path: "job", populate: { path: "company", select: "name locations" } }).lean();
   const enriched = await withStudentProfiles(applications);
-  const search = String(req.query.search || "").toLowerCase();
+  const searchTerms = parseSearchTerms(req.query.search).map((term) => term.toLowerCase());
   const filtered = enriched
     .filter((application) => !req.query.company || String(application.job && application.job.company && application.job.company._id) === String(req.query.company))
     .filter((application) => !req.query.college || String(application.student && application.student.academicDetails && application.student.academicDetails.college) === String(req.query.college))
@@ -197,14 +198,14 @@ const fetchExportApplications = async (req, res) => {
       const jobLocations = (application.job && application.job.location) || [];
       return [...companyLocations, ...jobLocations].includes(req.query.location);
     })
-    .filter((application) => !search || [
+    .filter((application) => searchTerms.every((term) => [
       application.student && application.student.name,
       application.student && application.student.email,
       application.student && application.student.academicDetails && application.student.academicDetails.college,
       application.student && joinList(application.student.technicalSkills),
       application.job && application.job.title,
       application.job && application.job.company && application.job.company.name,
-    ].some((value) => String(value || "").toLowerCase().includes(search)));
+    ].some((value) => String(value || "").toLowerCase().includes(term))));
   const columns = getExportColumns(req.query.fields);
   const rows = filtered.map((application) => columns.reduce((row, column) => ({ ...row, [column.label]: column.value(application) ?? "" }), {}));
   const buffer = await exportExcel({ rows, sheetName: "Applications" });

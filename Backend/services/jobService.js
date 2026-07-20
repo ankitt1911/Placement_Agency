@@ -4,24 +4,20 @@ const Application = require("../models/applicationModel");
 const StudentProfile = require("../models/studentProfileModel");
 const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
+const { parseSearchTerms, regexForTerm } = require("../utils/searchUtils");
 
 const pageValues = (query) => ({ page: parseInt(query.page) || 1, limit: parseInt(query.limit) || 10 });
 const compactOptions = (values) => [...new Set(values.flat().filter(Boolean).map(String))].sort();
 const categoryOptions = ["IT", "Non-IT"];
 const currentApplicationStatus = (application) => application && application.status !== "Withdrawn" ? application.status : null;
-const escapeRegex = (value) => String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
 const buildJobQuery = async (query) => {
   const filter = { status: "Open" };
-  if (query.search) {
-    const pattern = new RegExp(escapeRegex(query.search), "i");
+  const searchTerms = parseSearchTerms(query.search);
+  if (searchTerms.length) filter.$and = await Promise.all(searchTerms.map(async (term) => {
+    const pattern = regexForTerm(term);
     const companies = await Company.find({ name: pattern }).select("_id").lean();
-    filter.$or = [
-      { title: pattern },
-      { skills: pattern },
-      { company: { $in: companies.map((company) => company._id) } },
-    ];
-  }
+    return { $or: [{ title: pattern }, { skills: pattern }, { company: { $in: companies.map((company) => company._id) } }] };
+  }));
   if (query.company) filter.company = query.company;
   if (query.role) filter.title = new RegExp(query.role, "i");
   if (query.location) filter.location = { $in: String(query.location).split(",") };

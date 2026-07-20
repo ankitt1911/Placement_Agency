@@ -152,8 +152,8 @@ export default function OperationsList({
 
   const filtered = useMemo(() => {
     if (fetchFilterOptions) return items;
-    const query = search.toLowerCase();
-    return items.filter((item) => searchKeys.some((key) => String(item[key] || "").toLowerCase().includes(query)));
+    const terms = search.split("\n").map((term) => term.trim().toLowerCase()).filter(Boolean);
+    return items.filter((item) => terms.every((term) => searchKeys.some((key) => String(item[key] || "").toLowerCase().includes(term))));
   }, [items, search, searchKeys, fetchFilterOptions]);
 
   const runConfirm = async () => {

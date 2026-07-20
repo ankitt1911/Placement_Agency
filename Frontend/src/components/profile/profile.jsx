@@ -46,6 +46,15 @@ export default function Profile() {
   const updateSection = (section, field, value) => {
     setProfile((current) => ({ ...current, [section]: { ...(current[section] || {}), [field]: value } }));
   };
+  const updateEducation = (qualification, field, value) => {
+    setProfile((current) => ({
+      ...current,
+      education: {
+        ...(current.education || {}),
+        [qualification]: { ...(current.education?.[qualification] || {}), [field]: value }
+      }
+    }));
+  };
   const completionSummary = profile ? countFilledFields(profile) : { filled: 0, total: 0 };
   const completion = completionSummary.total ? Math.round((completionSummary.filled / completionSummary.total) * 100) : 0;
   const remainingFields = Math.max(completionSummary.total - completionSummary.filled, 0);
@@ -72,9 +81,17 @@ export default function Profile() {
       percentage: isRequired(profile.academic.percentage, "Percentage") || isPercentage(profile.academic.percentage),
       totalBacklogs: isRequired(profile.academic.totalBacklogs, "Total backlogs"),
       activeBacklogs: isRequired(profile.academic.activeBacklogs, "Active backlogs"),
-      tenth: isRequired(profile.education.tenth, "10th details"),
-      twelfth: isRequired(profile.education.twelfth, "12th details"),
-      graduation: isRequired(profile.education.graduation, "Graduation details"),
+      "tenth.board": isRequired(profile.education.tenth?.board, "10th board"),
+      "tenth.year": isRequired(profile.education.tenth?.year, "10th passing year"),
+      "tenth.percentage": isRequired(profile.education.tenth?.percentage, "10th percentage") || isPercentage(profile.education.tenth?.percentage),
+      "twelfth.board": isRequired(profile.education.twelfth?.board, "12th board"),
+      "twelfth.year": isRequired(profile.education.twelfth?.year, "12th passing year"),
+      "twelfth.percentage": isRequired(profile.education.twelfth?.percentage, "12th percentage") || isPercentage(profile.education.twelfth?.percentage),
+      "graduation.college": isRequired(profile.education.graduation?.college, "Graduation college"),
+      "graduation.university": isRequired(profile.education.graduation?.university, "Graduation university"),
+      "graduation.branch": isRequired(profile.education.graduation?.branch, "Graduation branch or course"),
+      "graduation.cgpa": isRequired(profile.education.graduation?.cgpa, "Graduation CGPA") || isCgpa(profile.education.graduation?.cgpa),
+      "graduation.passingYear": isRequired(profile.education.graduation?.passingYear, "Graduation passing year"),
       technicalSkills: isRequired(profile.skills.technicalSkills, "Technical skills"),
       languages: isRequired(profile.skills.languages, "Languages"),
       portfolio: isUrl(profile.links.portfolio),
@@ -174,7 +191,7 @@ export default function Profile() {
         <div className="grid gap-5 xl:grid-cols-2">
           <PersonalDetailsForm data={profile.personal} onChange={(field, value) => updateSection("personal", field, value)} errors={errors} />
           <AcademicDetailsForm data={profile.academic} onChange={(field, value) => updateSection("academic", field, value)} errors={errors} />
-          <EducationDetailsForm data={profile.education} onChange={(field, value) => updateSection("education", field, value)} errors={errors} />
+          <EducationDetailsForm data={profile.education} onChange={updateEducation} errors={errors} />
           <SkillsForm data={profile.skills} onChange={(field, value) => updateSection("skills", field, value)} errors={errors} />
           <ExperienceProjectsForm data={profile.experience} onChange={(field, value) => updateSection("experience", field, value)} errors={errors} />
         </div>

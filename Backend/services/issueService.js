@@ -1,4 +1,5 @@
 const Issue = require("../models/issueModel");
+const { buildAndSearch } = require("../utils/searchUtils");
 
 const isOps = (req) => req.user.role === "operations";
 const requireOps = (req, res) => isOps(req) || (res.status(403).json({ success: false, message: "Access denied", statusCode: 403 }), false);
@@ -10,10 +11,8 @@ const buildQuery = (req, scope) => {
   if (scope === "my") query.raisedBy = req.user.mongoId;
   if (scope === "raised" && !isOps(req)) query.raisedBy = req.user.mongoId;
   if (req.query.status) query.status = req.query.status;
-  if (req.query.search) {
-    const pattern = new RegExp(String(req.query.search).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
-    query.$or = [{ subject: pattern }, { description: pattern }];
-  }
+  const searchConditions = buildAndSearch(req.query.search, ["subject", "description"]);
+  if (searchConditions.length) query.$and = searchConditions;
   return query;
 };
 
