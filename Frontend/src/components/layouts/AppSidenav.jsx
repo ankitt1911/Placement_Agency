@@ -21,7 +21,7 @@ export default function AppSidenav({ role, mobile = false, profileComplete = tru
               key={item.path + item.label}
               to={item.path}
               onClick={(event) => {
-                if (role === "student" && !profileComplete && item.path !== "/student/profile") {
+                if (role === "student" && profileComplete === false && item.path !== "/student/profile") {
                   event.preventDefault();
                   onBlockedNavigation?.();
                 }
