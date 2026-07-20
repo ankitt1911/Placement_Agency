@@ -36,11 +36,15 @@ export default function AppLayout() {
   }, [checkProfile]);
 
   useEffect(() => {
-    if (role === "student" && !checkingProfile && !profileComplete && location.pathname !== "/student/profile") {
+    if (role === "student" && !checkingProfile && profileComplete === false && location.pathname !== "/student/profile") {
       setCompletionModalOpen(true);
       navigate("/student/profile", { replace: true });
     }
   }, [checkingProfile, location.pathname, navigate, profileComplete, role]);
+
+  useEffect(() => {
+    if (profileComplete === true) setCompletionModalOpen(false);
+  }, [profileComplete]);
 
   const showCompletionModal = () => {
     setDrawerOpen(false);
