@@ -1,6 +1,7 @@
 const Company = require("../models/companyModel");
 const JobOpening = require("../models/jobOpeningModel");
 const { exportExcel } = require("../utils/exportExcel");
+const { buildAndSearch } = require("../utils/searchUtils");
 
 const requireOps = (req, res) => {
   if (req.user.role !== "operations") {
@@ -10,14 +11,10 @@ const requireOps = (req, res) => {
   return true;
 };
 
-const escapeRegex = (value) => String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
 const companyQuery = (query, publicOnly = false) => {
   const filter = publicOnly ? { isActive: true } : {};
-  if (query.search) {
-    const pattern = new RegExp(escapeRegex(query.search), "i");
-    filter.$or = [{ name: pattern }, { industry: pattern }, { locations: pattern }];
-  }
+  const searchConditions = buildAndSearch(query.search, ["name", "industry", "locations"]);
+  if (searchConditions.length) filter.$and = searchConditions;
   if (query.industry) filter.industry = new RegExp(query.industry, "i");
   if (query.location) filter.locations = { $in: String(query.location).split(",") };
   if (query.isActive !== undefined) filter.isActive = query.isActive === "true";

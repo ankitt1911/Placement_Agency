@@ -2,13 +2,13 @@ const JobOpening = require("../models/jobOpeningModel");
 const Company = require("../models/companyModel");
 const Application = require("../models/applicationModel");
 const { exportExcel } = require("../utils/exportExcel");
+const { parseSearchTerms, regexForTerm } = require("../utils/searchUtils");
 
 const requireOps = (req, res) => req.user.role === "operations" || (res.status(403).json({ success: false, message: "Access denied", statusCode: 403 }), false);
 const compactOptions = (values) => [...new Set(values.flat().filter(Boolean).map(String))].sort();
 const categoryOptions = ["IT", "Non-IT"];
 const formatDate = (value) => value ? new Date(value).toISOString().slice(0, 10) : "";
 const joinList = (value) => Array.isArray(value) ? value.filter(Boolean).join(", ") : "";
-const escapeRegex = (value) => String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const jobExportColumns = [
   { key: "company", label: "Company", value: (job) => job.company && job.company.name },
   { key: "companyId", label: "Company ID", value: (job) => job.company && job.company._id },
@@ -42,16 +42,12 @@ const getExportColumns = (fields) => {
 
 const buildQuery = async (q) => {
   const query = {};
-  if (q.search) {
-    const pattern = new RegExp(escapeRegex(q.search), "i");
+  const searchTerms = parseSearchTerms(q.search);
+  if (searchTerms.length) query.$and = await Promise.all(searchTerms.map(async (term) => {
+    const pattern = regexForTerm(term);
     const companies = await Company.find({ name: pattern }).select("_id").lean();
-    query.$or = [
-      { company: { $in: companies.map((company) => company._id) } },
-      { title: pattern },
-      { location: pattern },
-      { skills: pattern },
-    ];
-  }
+    return { $or: [{ company: { $in: companies.map((company) => company._id) } }, { title: pattern }, { location: pattern }, { skills: pattern }] };
+  }));
   if (q.company) query.company = q.company;
   if (q.role || q.title) query.title = new RegExp(q.role || q.title, "i");
   if (q.location) query.location = { $in: String(q.location).split(",") };

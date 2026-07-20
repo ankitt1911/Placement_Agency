@@ -69,7 +69,7 @@ export default function StudentManagement() {
       fetchFilterOptions={handleGetStudentFilterOptions}
       searchKeys={["name", "email", "mobile", "college", "skills"]}
       columns={[{ key: "name", label: "Student" }, { key: "college", label: "College" }, { key: "branch", label: "Branch" }, { key: "cgpa", label: "CGPA" }, { key: "location", label: "Location" }, { key: "skills", label: "Skills" }, { key: "passingYear", label: "Passing Year" }, { key: "status", label: "Status" }]}
-      filterConfig={[{ key: "college", label: "College" }, { key: "branch", label: "Branch" }, { key: "passingYear", label: "Year of Passing" }, { key: "qualification", label: "Qualification" }, { key: "backlog", label: "Active Backlogs" }, { key: "location", label: "Location" }, { key: "status", label: "Status" }]}
+      filterConfig={[{ key: "college", label: "College" }, { key: "branch", label: "Branch" }, { key: "passingYear", label: "Year of Passing" }, { key: "qualification", label: "Qualification" }]}
       statusActions={[
         { label: (row) => row.status === "Disabled" ? "Enable" : "Disable", message: (row) => `${row.status === "Disabled" ? "Enable" : "Disable"} ${row.name}?`, run: (row) => handleDisableStudent(row.id), update: (rows, row, updated) => rows.map((item) => item.id === row.id ? { ...item, ...(updated?.id ? updated : {}), status: row.status === "Disabled" ? "Active" : "Disabled" } : item), success: (row) => row.status === "Disabled" ? "Student enabled" : "Student disabled" },
         { label: "Resume", message: (row) => `Download resume for ${row.name}?`, run: async (row) => downloadBlob(await handleDownloadResume(row), row.resume), update: (rows) => rows, success: "Resume downloaded" }

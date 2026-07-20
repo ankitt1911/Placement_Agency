@@ -2,11 +2,11 @@ const path = require("path");
 const User = require("../models/userModel");
 const StudentProfile = require("../models/studentProfileModel");
 const { exportExcel } = require("../utils/exportExcel");
+const { parseSearchTerms, regexForTerm } = require("../utils/searchUtils");
 
 const requireOps = (req, res) => req.user.role === "operations" || (res.status(403).json({ success: false, message: "Access denied", statusCode: 403 }), false);
 const compactOptions = (values) => [...new Set(values.flat().filter(Boolean).map(String))].sort();
 const formatDate = (value) => value ? new Date(value).toISOString().slice(0, 10) : "";
-const escapeRegex = (value) => String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const joinList = (value, mapper) => {
   if (!Array.isArray(value)) return "";
   return value.map((item) => mapper ? mapper(item) : item).filter(Boolean).join(", ");
@@ -85,16 +85,12 @@ const getExportColumns = (fields) => {
 
 const buildProfileQuery = async (q) => {
   const query = {};
-  if (q.search) {
-    const pattern = new RegExp(escapeRegex(q.search), "i");
+  const searchTerms = parseSearchTerms(q.search);
+  if (searchTerms.length) query.$and = await Promise.all(searchTerms.map(async (term) => {
+    const pattern = regexForTerm(term);
     const users = await User.find({ role: "student", email: pattern }).select("_id").lean();
-    query.$or = [
-      { name: pattern },
-      { user: { $in: users.map((user) => user._id) } },
-      { "academicDetails.college": pattern },
-      { technicalSkills: pattern },
-    ];
-  }
+    return { $or: [{ name: pattern }, { user: { $in: users.map((user) => user._id) } }, { "academicDetails.college": pattern }, { technicalSkills: pattern }] };
+  }));
   if (q.college) query["academicDetails.college"] = new RegExp(q.college, "i");
   if (q.branch) query["academicDetails.branch"] = new RegExp(q.branch, "i");
   if (q.cgpaMin || q.cgpaMax) query["academicDetails.cgpa"] = {};

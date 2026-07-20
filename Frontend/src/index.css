@@ -226,15 +226,23 @@
   }
 
   .filter-panel {
-    @apply flex flex-nowrap items-end justify-between gap-3 overflow-x-auto;
+    @apply flex flex-nowrap items-end justify-between gap-3 overflow-x-auto pb-9;
   }
 
   .filter-actions {
-    @apply ml-auto flex shrink-0 flex-nowrap items-end gap-2;
+    @apply ml-auto flex shrink-0 flex-nowrap items-end gap-4;
   }
 
   .filter-control {
-    @apply min-w-[9.5rem] max-w-[11rem] shrink-0;
+    @apply relative min-w-[7.5rem] max-w-[9rem] shrink-0;
+  }
+
+  .filter-control .form-label {
+    @apply mb-1 text-xs;
+  }
+
+  .filter-control .form-input {
+    @apply rounded-lg px-2.5 py-1.5 text-xs;
   }
 
   .filter-search {

@@ -21,17 +21,26 @@ const salaryLabel = (salary) => {
   return (max || min || "").toLocaleString();
 };
 const numberOrUndefined = (value) => value === "" || value === null || value === undefined ? undefined : Number(value);
-const educationToText = (value, fields) => {
-  if (!value || typeof value !== "object") return value || "";
-  return fields.map((field) => value[field]).filter((item) => item !== "" && item !== null && item !== undefined).join(", ");
-};
-const educationToObject = (value, fields) => {
-  if (!value || typeof value === "object") return value || undefined;
+const educationToUi = (value, fields) => {
+  if (!value) return {};
+  if (typeof value === "object") return fields.reduce((result, field) => ({ ...result, [field]: value[field] ?? "" }), {});
   const parts = String(value).split(",").map((item) => item.trim());
   return fields.reduce((result, field, index) => {
-    if (parts[index]) result[field] = ["year", "passingYear", "percentage", "cgpa"].includes(field) ? Number(parts[index]) : parts[index];
+    result[field] = parts[index] || "";
     return result;
   }, {});
+};
+const educationToApi = (value, fields) => {
+  if (!value) return undefined;
+  const source = typeof value === "object" ? value : educationToUi(value, fields);
+  const result = fields.reduce((education, field) => {
+    const fieldValue = source[field];
+    if (fieldValue !== "" && fieldValue !== null && fieldValue !== undefined) {
+      education[field] = ["year", "passingYear", "percentage", "cgpa"].includes(field) ? Number(fieldValue) : fieldValue;
+    }
+    return education;
+  }, {});
+  return Object.keys(result).length ? result : undefined;
 };
 const activeApplicationStatuses = ["Applied", "Under Review", "Shortlisted", "Selected", "Rejected"];
 const isActiveApplicationStatus = (status) => activeApplicationStatuses.includes(status);
@@ -158,11 +167,11 @@ export const mapProfileToUi = (profile = {}) => ({
     address: profile.address || ""
   },
   education: {
-    tenth: educationToText(profile.education?.tenth, ["board", "year", "percentage"]),
-    twelfth: educationToText(profile.education?.twelfth, ["board", "year", "percentage"]),
-    diploma: educationToText(profile.education?.diploma, ["college", "branch", "cgpa"]),
-    graduation: educationToText(profile.education?.graduation, ["college", "branch", "cgpa"]),
-    postGraduation: educationToText(profile.education?.postGraduation, ["college", "branch", "cgpa"])
+    tenth: educationToUi(profile.education?.tenth, ["board", "year", "percentage"]),
+    twelfth: educationToUi(profile.education?.twelfth, ["board", "year", "percentage"]),
+    diploma: educationToUi(profile.education?.diploma, ["college", "university", "branch", "cgpa", "passingYear"]),
+    graduation: educationToUi(profile.education?.graduation, ["college", "university", "branch", "cgpa", "passingYear"]),
+    postGraduation: educationToUi(profile.education?.postGraduation, ["college", "university", "branch", "cgpa", "passingYear"])
   },
   academic: profile.academicDetails || {},
   skills: {
@@ -203,11 +212,11 @@ export const mapProfileToApi = (profile = {}) => ({
   mobile: profile.personal?.mobile,
   address: profile.personal?.address,
   education: {
-    tenth: educationToObject(profile.education?.tenth, ["board", "year", "percentage"]),
-    twelfth: educationToObject(profile.education?.twelfth, ["board", "year", "percentage"]),
-    diploma: educationToObject(profile.education?.diploma, ["college", "branch", "cgpa"]),
-    graduation: educationToObject(profile.education?.graduation, ["college", "branch", "cgpa"]),
-    postGraduation: educationToObject(profile.education?.postGraduation, ["college", "branch", "cgpa"])
+    tenth: educationToApi(profile.education?.tenth, ["board", "year", "percentage"]),
+    twelfth: educationToApi(profile.education?.twelfth, ["board", "year", "percentage"]),
+    diploma: educationToApi(profile.education?.diploma, ["college", "university", "branch", "cgpa", "passingYear"]),
+    graduation: educationToApi(profile.education?.graduation, ["college", "university", "branch", "cgpa", "passingYear"]),
+    postGraduation: educationToApi(profile.education?.postGraduation, ["college", "university", "branch", "cgpa", "passingYear"])
   },
   academicDetails: profile.academic,
   technicalSkills: split(profile.skills?.technicalSkills),
