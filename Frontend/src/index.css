@@ -18,11 +18,16 @@
 }
 
 .india-location-dropdown {
+  position: relative;
   z-index: 30;
   border: 0;
   border-radius: 0.75rem;
   background: transparent;
   font-family: inherit;
+}
+
+.india-location-dropdown:focus-within {
+  z-index: 9999;
 }
 
 .india-location-dropdown .stdropdown-input {
@@ -61,7 +66,8 @@
 }
 
 .india-location-dropdown .stdropdown-menu {
-  z-index: 50;
+  position: absolute;
+  z-index: 10000;
   max-height: 16rem;
   overflow-y: auto;
   margin-top: 0.35rem;

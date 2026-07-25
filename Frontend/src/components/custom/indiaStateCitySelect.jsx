@@ -1,11 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CitySelect, GetState, StateSelect } from "react-country-state-city";
 
 const INDIA_ID = 101;
-
-const closeOpenDropdown = () => {
-  globalThis.setTimeout(() => globalThis.document?.body?.click(), 0);
-};
 
 const parseLocation = (value) => {
   const parts = String(value || "").split(",").map((part) => part.trim()).filter(Boolean);
@@ -25,6 +21,19 @@ export default function IndiaStateCitySelect({
 }) {
   const [selectedState, setSelectedState] = useState();
   const [selectedCity, setSelectedCity] = useState();
+  const [dropdownRevision, setDropdownRevision] = useState(0);
+  const locationSelectRef = useRef(null);
+
+  useEffect(() => {
+    const closeOnOutsideClick = (event) => {
+      if (!locationSelectRef.current?.contains(event.target)) {
+        setDropdownRevision((revision) => revision + 1);
+      }
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    return () => document.removeEventListener("pointerdown", closeOnOutsideClick);
+  }, []);
 
   useEffect(() => {
     const { stateName, cityName } = parseLocation(value);
@@ -49,20 +58,21 @@ export default function IndiaStateCitySelect({
     setSelectedState(state);
     setSelectedCity(undefined);
     onChange("");
-    closeOpenDropdown();
+    setDropdownRevision((revision) => revision + 1);
   };
 
   const selectCity = (city) => {
     setSelectedCity(city);
     onChange(`${city.name}, ${selectedState.name}, India`);
-    closeOpenDropdown();
+    setDropdownRevision((revision) => revision + 1);
   };
 
   return (
-    <div className="india-location-grid">
+    <div ref={locationSelectRef} className="india-location-grid">
       <div>
         <span className="form-label">{stateLabel}{required ? <span className="ml-1 text-red-600">*</span> : null}</span>
         <StateSelect
+          key={`state-${dropdownRevision}`}
           countryid={INDIA_ID}
           onChange={selectState}
           defaultValue={selectedState}
@@ -74,7 +84,7 @@ export default function IndiaStateCitySelect({
       <div>
         <span className="form-label">{cityLabel}{required ? <span className="ml-1 text-red-600">*</span> : null}</span>
         <CitySelect
-          key={selectedState?.id || "no-state"}
+          key={`city-${selectedState?.id || "no-state"}-${dropdownRevision}`}
           countryid={INDIA_ID}
           stateid={selectedState?.id || 0}
           onChange={selectCity}
