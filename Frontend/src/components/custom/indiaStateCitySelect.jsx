@@ -1,7 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import { CitySelect, GetState, StateSelect } from "react-country-state-city";
+import { useEffect, useMemo, useState } from "react";
+import { GetCity, GetState } from "react-country-state-city";
 
 const INDIA_ID = 101;
+let statesPromise;
+
+const loadStates = () => {
+  statesPromise ??= GetState(INDIA_ID);
+  return statesPromise;
+};
 
 const parseLocation = (value) => {
   const parts = String(value || "").split(",").map((part) => part.trim()).filter(Boolean);
@@ -19,83 +25,96 @@ export default function IndiaStateCitySelect({
   stateLabel = "State",
   cityLabel = "City / District"
 }) {
-  const [selectedState, setSelectedState] = useState();
-  const [selectedCity, setSelectedCity] = useState();
-  const [dropdownRevision, setDropdownRevision] = useState(0);
-  const locationSelectRef = useRef(null);
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [selectedStateId, setSelectedStateId] = useState("");
+  const [selectedCityName, setSelectedCityName] = useState("");
+  const parsedLocation = useMemo(() => parseLocation(value), [value]);
 
   useEffect(() => {
-    const closeOnOutsideClick = (event) => {
-      if (!locationSelectRef.current?.contains(event.target)) {
-        setDropdownRevision((revision) => revision + 1);
-      }
-    };
-
-    document.addEventListener("pointerdown", closeOnOutsideClick);
-    return () => document.removeEventListener("pointerdown", closeOnOutsideClick);
-  }, []);
-
-  useEffect(() => {
-    const { stateName, cityName } = parseLocation(value);
-    if (!stateName) return;
+    if (!parsedLocation.stateName) return;
 
     let active = true;
-    GetState(INDIA_ID).then((states) => {
+
+    loadStates().then((items) => {
       if (!active) return;
-      const state = states.find((item) => item.name.toLowerCase() === stateName.toLowerCase());
-      if (state) {
-        setSelectedState(state);
-        setSelectedCity(cityName ? { name: cityName } : undefined);
-      }
+      setStates(items);
+      const matchingState = items.find(
+        (item) => item.name.toLowerCase() === parsedLocation.stateName.toLowerCase()
+      );
+      setSelectedStateId(matchingState ? String(matchingState.id) : "");
+      setSelectedCityName(matchingState ? parsedLocation.cityName : "");
     });
 
     return () => {
       active = false;
     };
-  }, [value]);
+  }, [parsedLocation]);
 
-  const selectState = (state) => {
-    setSelectedState(state);
-    setSelectedCity(undefined);
+  useEffect(() => {
+    if (!selectedStateId) {
+      setCities([]);
+      return;
+    }
+
+    let active = true;
+    GetCity(INDIA_ID, Number(selectedStateId)).then((items) => {
+      if (active) setCities(items);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [selectedStateId]);
+
+  const selectState = (event) => {
+    setSelectedStateId(event.target.value);
+    setSelectedCityName("");
     onChange("");
-    setDropdownRevision((revision) => revision + 1);
   };
 
-  const selectCity = (city) => {
-    setSelectedCity(city);
-    onChange(`${city.name}, ${selectedState.name}, India`);
-    setDropdownRevision((revision) => revision + 1);
+  const selectCity = (event) => {
+    const cityName = event.target.value;
+    const state = states.find((item) => String(item.id) === selectedStateId);
+    setSelectedCityName(cityName);
+    onChange(cityName && state ? `${cityName}, ${state.name}, India` : "");
   };
 
   return (
-    <div ref={locationSelectRef} className="india-location-grid">
-      <div>
-        <span className="form-label">{stateLabel}{required ? <span className="ml-1 text-red-600">*</span> : null}</span>
-        <StateSelect
-          key={`state-${dropdownRevision}`}
-          countryid={INDIA_ID}
+    <div className="india-location-grid">
+      <label>
+        <span className="form-label">
+          {stateLabel}{required ? <span className="ml-1 text-red-600">*</span> : null}
+        </span>
+        <select
+          className="form-input"
+          value={selectedStateId}
           onChange={selectState}
-          defaultValue={selectedState}
-          placeHolder="Select state"
-          inputClassName="form-input"
-          containerClassName="india-location-dropdown"
-        />
-      </div>
-      <div>
-        <span className="form-label">{cityLabel}{required ? <span className="ml-1 text-red-600">*</span> : null}</span>
-        <CitySelect
-          key={`city-${selectedState?.id || "no-state"}-${dropdownRevision}`}
-          countryid={INDIA_ID}
-          stateid={selectedState?.id || 0}
-          onChange={selectCity}
-          defaultValue={selectedCity}
-          placeHolder={selectedState ? "Select city / district" : "Select a state first"}
-          inputClassName="form-input"
-          containerClassName="india-location-dropdown"
-          disabled={!selectedState}
           required={required}
-        />
-      </div>
+        >
+          <option value="">Select state</option>
+          {states.map((state) => (
+            <option key={state.id} value={state.id}>{state.name}</option>
+          ))}
+        </select>
+      </label>
+      <label>
+        <span className="form-label">
+          {cityLabel}{required ? <span className="ml-1 text-red-600">*</span> : null}
+        </span>
+        <select
+          className="form-input"
+          value={selectedCityName}
+          onChange={selectCity}
+          disabled={!selectedStateId}
+          required={required}
+        >
+          <option value="">{selectedStateId ? "Select city / district" : "Select a state first"}</option>
+          {cities.map((city) => (
+            <option key={city.id ?? city.name} value={city.name}>{city.name}</option>
+          ))}
+        </select>
+      </label>
     </div>
   );
 }
