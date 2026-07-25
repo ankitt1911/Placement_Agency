@@ -31,6 +31,24 @@ export default function IndiaStateCitySelect({
   const [selectedCityName, setSelectedCityName] = useState("");
   const parsedLocation = useMemo(() => parseLocation(value), [value]);
 
+  // Load the options for new/empty forms too. Previously states were only
+  // fetched while restoring an existing location, leaving new forms empty.
+  useEffect(() => {
+    let active = true;
+
+    loadStates()
+      .then((items) => {
+        if (active) setStates(Array.isArray(items) ? items : []);
+      })
+      .catch(() => {
+        if (active) setStates([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   useEffect(() => {
     if (!parsedLocation.stateName) return;
 
@@ -38,7 +56,7 @@ export default function IndiaStateCitySelect({
 
     loadStates().then((items) => {
       if (!active) return;
-      setStates(items);
+      setStates(Array.isArray(items) ? items : []);
       const matchingState = items.find(
         (item) => item.name.toLowerCase() === parsedLocation.stateName.toLowerCase()
       );
