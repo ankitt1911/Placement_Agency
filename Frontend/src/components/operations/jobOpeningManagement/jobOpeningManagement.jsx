@@ -8,6 +8,7 @@ import { isRequired } from "../../../Utlis/Common/commonValidator";
 import { ErrorMessage, SuccessMessage } from "../../../Utlis/Toastify/ToastMessage";
 import OpeningDetails from "../../studentOpenings/openingDetails";
 import OperationsList from "../shared/OperationsList";
+import IndiaStateCitySelect from "../../custom/indiaStateCitySelect";
 
 const initialForm = {
   company: "",
@@ -195,9 +196,9 @@ function OpeningFormModal({ open, opening, onClose, onSaved }) {
                 <span className="form-label">Description</span>
                 <textarea className="form-input min-h-28 rounded-lg" value={form.description} onChange={(event) => update("description", event.target.value)} />
               </label>
-              <label>
+              <label className="md:col-span-2">
                 <span className="form-label">Locations</span>
-                <input className="form-input" placeholder="Pune, Remote" value={form.location} onChange={(event) => update("location", event.target.value)} />
+                <IndiaStateCitySelect value={form.location} onChange={(value) => update("location", value)} />
               </label>
               <label>
                 <span className="form-label">Skills</span>
