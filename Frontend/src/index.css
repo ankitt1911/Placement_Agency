@@ -2,6 +2,114 @@
 @tailwind components;
 @tailwind utilities;
 
+.india-location-grid {
+  display: grid;
+  gap: 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgb(219 228 241 / 0.9);
+  background: linear-gradient(135deg, rgb(248 250 252 / 0.95), rgb(239 246 255 / 0.75));
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .india-location-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.india-location-dropdown {
+  z-index: 30;
+  border: 0;
+  border-radius: 0.75rem;
+  background: transparent;
+  font-family: inherit;
+}
+
+.india-location-dropdown .stdropdown-input {
+  position: relative;
+  border: 0;
+  padding: 0;
+  border-radius: 0.75rem;
+  background: transparent;
+}
+
+.india-location-dropdown .stdropdown-input input {
+  padding-right: 2.75rem;
+  font-family: inherit !important;
+  cursor: pointer;
+}
+
+.india-location-dropdown .stdropdown-input:focus-within input {
+  border-color: rgb(37 99 235);
+  background: white;
+  box-shadow: 0 0 0 3px rgb(191 219 254 / 0.7);
+}
+
+.india-location-dropdown .stdropdown-tools {
+  pointer-events: none;
+  position: absolute;
+  right: 0.9rem;
+  display: flex;
+  align-items: center;
+  color: rgb(37 99 235);
+}
+
+.india-location-dropdown .stdropdown-tool svg {
+  height: 1rem;
+  width: 1rem;
+  fill: currentColor;
+}
+
+.india-location-dropdown .stdropdown-menu {
+  z-index: 50;
+  max-height: 16rem;
+  overflow-y: auto;
+  margin-top: 0.35rem;
+  border: 1px solid rgb(219 228 241);
+  border-radius: 0.85rem;
+  background: rgb(255 255 255 / 0.98);
+  padding: 0.35rem;
+  box-shadow: 0 18px 45px rgb(15 23 42 / 0.16);
+  backdrop-filter: blur(12px);
+}
+
+.india-location-dropdown .stdropdown-item {
+  margin: 0.1rem 0;
+  border-radius: 0.6rem;
+  padding: 0.65rem 0.75rem;
+  color: rgb(30 41 59);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+.india-location-dropdown .stdropdown-item:hover {
+  transform: translateX(2px);
+  background: rgb(239 246 255);
+  color: rgb(29 78 216);
+}
+
+.india-location-dropdown .stdropdown-item.selected {
+  background: linear-gradient(135deg, rgb(37 99 235), rgb(29 78 216));
+  color: white;
+}
+
+.india-location-dropdown .stdropdown-menu::-webkit-scrollbar {
+  width: 0.4rem;
+}
+
+.india-location-dropdown .stdropdown-menu::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgb(147 197 253);
+}
+
+.india-location-dropdown input:disabled {
+  cursor: not-allowed;
+  border-color: rgb(226 232 240);
+  background: rgb(241 245 249);
+  color: rgb(148 163 184);
+}
+
 @layer base {
   body {
     @apply bg-portal-canvas text-portal-ink antialiased;

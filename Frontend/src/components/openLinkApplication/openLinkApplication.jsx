@@ -7,6 +7,7 @@ import HeardAboutForm from "../profile/HeardAboutForm";
 import PageLoader from "../loader/PageLoader";
 import { ErrorMessage, SuccessMessage } from "../../Utlis/Toastify/ToastMessage";
 import { handleApplyViaOpenLink, handleGetOpenLinkOpening } from "../../Services/apiCalling/openLinkApis";
+import IndiaStateCitySelect from "../custom/indiaStateCitySelect";
 
 const initialForm = {
   name: "",
@@ -207,7 +208,10 @@ export default function OpenLinkApplication() {
                   <option value="Other">Other</option>
                 </select>
               </label>
-              <Field icon={MapPin} label="Address" value={form.address} onChange={(value) => update("address", value)} />
+              <div className="md:col-span-2">
+                <span className="form-label">Address</span>
+                <IndiaStateCitySelect value={form.address} onChange={(value) => update("address", value)} />
+              </div>
             </div>
           </FormCard>
 
@@ -229,9 +233,13 @@ export default function OpenLinkApplication() {
 
           <FormCard icon={Sparkles} title="Skills, Experience And Links" subtitle="Use comma separated entries where relevant." tone="amber">
             <div className="grid gap-4 md:grid-cols-2">
-              {["technicalSkills", "softSkills", "languages", "projects", "internships", "achievements", "certifications", "preferredLocation"].map((field) => (
+              {["technicalSkills", "softSkills", "languages", "projects", "internships", "achievements", "certifications"].map((field) => (
                 <Field key={field} label={`${prettyLabel(field)} (comma separated)`} value={form[field]} onChange={(value) => update(field, value)} />
               ))}
+              <div className="md:col-span-2">
+                <span className="form-label">Preferred location</span>
+                <IndiaStateCitySelect value={form.preferredLocation} onChange={(value) => update("preferredLocation", value)} />
+              </div>
               <Field icon={BriefcaseBusiness} label="Total experience" type="number" value={form.totalExperience} onChange={(value) => update("totalExperience", value)} />
               <Field icon={IndianRupee} label="Expected salary" type="number" value={form.expectedSalary} onChange={(value) => update("expectedSalary", value)} />
               <Field icon={FileText} label="Resume link" value={form.resume} onChange={(value) => update("resume", value)} />

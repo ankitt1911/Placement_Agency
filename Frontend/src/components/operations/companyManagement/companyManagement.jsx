@@ -6,6 +6,7 @@ import { isEmail, isRequired, isUrl } from "../../../Utlis/Common/commonValidato
 import { ErrorMessage, SuccessMessage } from "../../../Utlis/Toastify/ToastMessage";
 import CompanyDetails from "./companyDetails";
 import OperationsList from "../shared/OperationsList";
+import IndiaStateCitySelect from "../../custom/indiaStateCitySelect";
 
 const initialForm = {
   name: "",
@@ -145,11 +146,11 @@ function CompanyFormModal({ open, company, onClose, onSaved }) {
               </label>
               <label className="md:col-span-2">
                 <span className="form-label">Address</span>
-                <textarea className="form-input min-h-24 rounded-lg" value={form.address} onChange={(event) => update("address", event.target.value)} />
+                <IndiaStateCitySelect value={form.address} onChange={(value) => update("address", value)} />
               </label>
-              <label>
+              <label className="md:col-span-2">
                 <span className="form-label">Locations</span>
-                <input className="form-input" placeholder="Pune, Remote" value={form.locations} onChange={(event) => update("locations", event.target.value)} />
+                <IndiaStateCitySelect value={form.locations} onChange={(value) => update("locations", value)} />
               </label>
               <label>
                 <span className="form-label">Website</span>

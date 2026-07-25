@@ -1,4 +1,5 @@
 import { CheckCircle2 } from "lucide-react";
+import IndiaStateCitySelect from "../custom/indiaStateCitySelect";
 
 export default function ProfileSection({ title, fields, data, onChange, errors = {}, icon: Icon = CheckCircle2, description = "Fill the details that help verify your placement readiness." }) {
   const filled = fields.filter((field) => String(data[field.name] || "").trim()).length;
@@ -28,12 +29,18 @@ export default function ProfileSection({ title, fields, data, onChange, errors =
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         {fields.map((field) => (
-          <label key={field.name} className={field.type === "textarea" || field.wide ? "md:col-span-2" : ""}>
+          <label key={field.name} className={field.type === "textarea" || field.type === "india-location" || field.wide ? "md:col-span-2" : ""}>
+            {field.type === "india-location" ? (
+              <IndiaStateCitySelect value={data[field.name]} onChange={(value) => onChange(field.name, value)} required={field.required} />
+            ) : (
+              <>
             <span className="form-label">{field.label}{field.required ? <span className="ml-1 text-red-600">*</span> : null}</span>
             {field.type === "textarea" ? (
               <textarea required={field.required} className="form-input min-h-28 rounded-lg" placeholder={field.placeholder || ""} value={data[field.name] || ""} onChange={(event) => onChange(field.name, event.target.value)} />
             ) : (
               <input required={field.required} className="form-input" type={field.type || "text"} placeholder={field.placeholder || ""} value={data[field.name] || ""} onChange={(event) => onChange(field.name, event.target.value)} />
+            )}
+              </>
             )}
             {errors[field.name] ? <span className="mt-1 block text-xs text-red-600">{errors[field.name]}</span> : null}
           </label>
