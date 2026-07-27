@@ -74,7 +74,6 @@ export default function CompanyDetails({ company }) {
             <FactCard label="Industry" value={company.industry} icon={Building2} tone="border-blue-100 bg-blue-50 text-blue-700" />
             <FactCard label="Locations" value={join(company.locations)} icon={MapPin} tone="border-emerald-100 bg-emerald-50 text-emerald-700" />
             <FactCard label="Website" value={company.website} icon={Globe} tone="border-purple-100 bg-purple-50 text-purple-700" />
-            <FactCard label="Address" value={company.address} icon={MapPin} tone="border-amber-100 bg-amber-50 text-amber-700" />
           </div>
         </div>
       </section>

@@ -1,8 +1,11 @@
 import { X } from "lucide-react";
 
 export default function FilterSelect({ label, value, onChange, options = [] }) {
+  const formatLabel = (optionLabel) => label?.toLowerCase().includes("location")
+    ? String(optionLabel || "").split(",")[0].trim()
+    : optionLabel;
   const selectedOption = options.find((option) => String(option?.value ?? option) === String(value));
-  const selectedLabel = selectedOption && typeof selectedOption === "object" ? selectedOption.label : selectedOption || value;
+  const selectedLabel = formatLabel(selectedOption && typeof selectedOption === "object" ? selectedOption.label : selectedOption || value);
 
   return (
     <div className="filter-control">
@@ -12,7 +15,7 @@ export default function FilterSelect({ label, value, onChange, options = [] }) {
           <option value="">{label || "All"}</option>
           {options.map((option) => (
             <option key={option.value || option} value={option.value || option}>
-              {option.label || option}
+              {formatLabel(option.label || option)}
             </option>
           ))}
         </select>

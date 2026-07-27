@@ -8,6 +8,11 @@ const { parseSearchTerms, regexForTerm } = require("../utils/searchUtils");
 
 const pageValues = (query) => ({ page: parseInt(query.page) || 1, limit: parseInt(query.limit) || 10 });
 const compactOptions = (values) => [...new Set(values.flat().filter(Boolean).map(String))].sort();
+const companyOptions = (companies) => companies
+  .filter(Boolean)
+  .map((company) => ({ label: company.name, value: String(company._id) }))
+  .filter((option, index, options) => options.findIndex((item) => item.value === option.value) === index)
+  .sort((first, second) => first.label.localeCompare(second.label));
 const categoryOptions = ["IT", "Non-IT"];
 const currentApplicationStatus = (application) => application && application.status !== "Withdrawn" ? application.status : null;
 const buildJobQuery = async (query) => {
@@ -48,7 +53,10 @@ const fetchGetOpenings = async (req, res) => {
   try {
     if (req.user.role !== "student") return res.status(403).json({ success: false, message: "Access denied", statusCode: 403 });
     const { page, limit } = pageValues(req.query);
-    const activeCompanies = await Company.find({ isActive: true }).select("_id").lean();
+    const activeCompanies = await Company.find({
+      isActive: true,
+      ...(req.query.company ? { _id: req.query.company } : {}),
+    }).select("_id").lean();
     const query = { ...(await buildJobQuery(req.query)), company: { $in: activeCompanies.map((company) => company._id) } };
     const jobs = await JobOpening.find(query).populate("company", "name industry locations website logo isActive").sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean();
     const applied = await Application.find({ student: req.user.mongoId, job: { $in: jobs.map((job) => job._id) } }).select("job status").lean();
@@ -65,8 +73,12 @@ const fetchGetOpeningFilterOptions = async (req, res) => {
   try {
     if (req.user.role !== "student") return res.status(403).json({ success: false, message: "Access denied", statusCode: 403 });
     const activeCompanies = await Company.find({ isActive: true }).select("_id").lean();
-    const jobs = await JobOpening.find({ status: "Open", company: { $in: activeCompanies.map((company) => company._id) } }).select("location skills languages jobType category").lean();
+    const jobs = await JobOpening.find({ status: "Open", company: { $in: activeCompanies.map((company) => company._id) } })
+      .select("company location skills languages jobType category")
+      .populate("company", "name")
+      .lean();
     const data = {
+      company: companyOptions(jobs.map((job) => job.company)),
       location: compactOptions(jobs.map((job) => job.location || [])),
       skills: compactOptions(jobs.map((job) => job.skills || [])),
       languages: compactOptions(jobs.map((job) => job.languages || [])),

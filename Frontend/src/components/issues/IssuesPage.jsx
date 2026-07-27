@@ -13,15 +13,9 @@ import StatusBadge from "../custom/statusBadge";
 import PageLoader from "../loader/PageLoader";
 import IssueModal from "./IssueModal";
 
-const tabs = [
-  { key: "my", label: "My Issues" },
-  { key: "raised", label: "Raised Issues" },
-];
-
 export default function IssuesPage() {
   const { role } = useSelector((state) => state.auth);
   const isOps = role === "operations";
-  const [activeTab, setActiveTab] = useState("my");
   const [issues, setIssues] = useState([]);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
@@ -41,7 +35,7 @@ export default function IssuesPage() {
   const loadIssues = async () => {
     setLoading(true);
     try {
-      const data = activeTab === "raised" && isOps ? await handleGetRaisedIssues(params) : await handleGetMyIssues(params);
+      const data = isOps ? await handleGetRaisedIssues(params) : await handleGetMyIssues(params);
       setIssues(data);
     } finally {
       setLoading(false);
@@ -51,7 +45,7 @@ export default function IssuesPage() {
   useEffect(() => {
     loadIssues();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, params, isOps]);
+  }, [params, isOps]);
 
   const visible = paginate(issues, page, limit);
 
@@ -61,8 +55,8 @@ export default function IssuesPage() {
       const created = await handleCreateIssue(form);
       SuccessMessage("Issue raised successfully");
       setModal({ open: false, mode: "view", issue: null });
-      if (activeTab === "my") setIssues((rows) => [created, ...rows]);
-      else loadIssues();
+      if (isOps) loadIssues();
+      else setIssues((rows) => [created, ...rows]);
     } finally {
       setPending(false);
     }
@@ -89,21 +83,6 @@ export default function IssuesPage() {
         </CustomButton>
       </div>
 
-      {isOps ? (
-        <div className="app-panel flex flex-wrap gap-2">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              className={`secondary-btn ${activeTab === tab.key ? "border-brand-100 bg-brand-50 text-brand-700" : ""}`}
-              type="button"
-              onClick={() => { setActiveTab(tab.key); setPage(1); }}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      ) : null}
-
       <div className="app-panel filter-panel">
         <SearchInput className="filter-search" value={search} onChange={(value) => { setSearch(value); setPage(1); }} placeholder="Search issues" />
         <div className="filter-actions">
@@ -125,7 +104,7 @@ export default function IssuesPage() {
                     <span className="listing-chip">{issue.priority} Priority</span>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2 pl-11">
-                    {isOps && activeTab === "raised" ? <span className="listing-chip"><span className="text-portal-muted">Raised By:</span><span>{issue.raisedByName || "-"}</span></span> : null}
+                    {isOps ? <span className="listing-chip"><span className="text-portal-muted">Raised By:</span><span>{issue.raisedByName || "-"}</span></span> : null}
                     <span className="listing-chip"><span className="text-portal-muted">Created:</span><span>{issue.createdDate || "-"}</span></span>
                     <span className="listing-chip"><span className="text-portal-muted">Updated:</span><span>{issue.updatedDate || "-"}</span></span>
                   </div>
@@ -146,7 +125,7 @@ export default function IssuesPage() {
         open={modal.open}
         mode={modal.mode}
         issue={modal.issue}
-        canUpdateStatus={isOps && activeTab === "raised" && modal.mode === "view"}
+        canUpdateStatus={isOps && modal.mode === "view"}
         onClose={() => setModal({ open: false, mode: "view", issue: null })}
         onSubmit={createIssue}
         onStatusChange={updateStatus}
