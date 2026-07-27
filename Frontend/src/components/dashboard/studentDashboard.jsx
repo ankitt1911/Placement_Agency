@@ -7,7 +7,7 @@ import EmptyState from "../custom/emptyState";
 import PageLoader from "../loader/PageLoader";
 import ApplicationSummaryCard from "./applicationSummaryCard";
 import DashboardStatCard from "./dashboardStatCard";
-import RecentOpeningCard from "./recentOpeningCard";
+import RecentOpeningsSlider from "./recentOpeningsSlider";
 
 export default function StudentDashboard() {
   const [data, setData] = useState(null);
@@ -49,7 +49,7 @@ export default function StudentDashboard() {
             <h2 className="section-title">Recent openings</h2>
           </div>
         </div>
-        {data?.recentOpenings?.length ? <div className="grid gap-3 lg:grid-cols-3">{data.recentOpenings.map((item) => <RecentOpeningCard key={item.id} opening={item} state={{ openingId: item.id }} />)}</div> : <EmptyState />}
+        {data?.recentOpenings?.length ? <RecentOpeningsSlider openings={data.recentOpenings} /> : <EmptyState />}
       </section>
       <section className="dashboard-section animate-dashboard-enter" style={{ animationDelay: "380ms" }}>
         <div className="dashboard-section-header">

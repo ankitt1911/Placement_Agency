@@ -154,6 +154,15 @@
     }
   }
 
+  @keyframes recent-openings-scroll {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
   @keyframes landing-rise {
     from {
       opacity: 0;
@@ -293,6 +302,32 @@
 
   .dashboard-section-header {
     @apply mb-4 flex flex-wrap items-end justify-between gap-3;
+  }
+
+  .recent-openings-marquee {
+    @apply w-full overflow-hidden;
+    mask-image: linear-gradient(to right, transparent, black 2.5rem, black calc(100% - 2.5rem), transparent);
+  }
+
+  .recent-openings-track {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+    animation: recent-openings-scroll var(--recent-openings-duration, 30s) linear infinite;
+  }
+
+  .recent-openings-group {
+    @apply flex shrink-0 gap-3 pr-3;
+  }
+
+  .recent-opening-slide {
+    width: clamp(14.5rem, 25vw, 18rem);
+    flex: 0 0 auto;
+  }
+
+  .recent-openings-marquee:hover .recent-openings-track,
+  .recent-openings-marquee:focus-within .recent-openings-track {
+    animation-play-state: paused;
   }
 
   .page-shell {
@@ -521,5 +556,20 @@
 
   .modal-score-card {
     @apply rounded-xl border px-4 py-3 text-center shadow-sm;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .recent-openings-marquee {
+      overflow-x: auto;
+      mask-image: none;
+    }
+
+    .recent-openings-track {
+      animation: none;
+    }
+
+    .recent-openings-group[aria-hidden="true"] {
+      display: none;
+    }
   }
 }
