@@ -7,7 +7,7 @@ import EmptyState from "../custom/emptyState";
 import PageLoader from "../loader/PageLoader";
 import ApplicationSummaryCard from "./applicationSummaryCard";
 import DashboardStatCard from "./dashboardStatCard";
-import RecentOpeningCard from "./recentOpeningCard";
+import RecentOpeningsSlider from "./recentOpeningsSlider";
 
 export default function OperationsDashboard() {
   const [data, setData] = useState(null);
@@ -67,7 +67,7 @@ export default function OperationsDashboard() {
             <h2 className="section-title">Recent openings</h2>
           </div>
         </div>
-        {data?.recentOpenings?.length ? <div className="grid gap-3 lg:grid-cols-3">{data.recentOpenings.map((item) => <RecentOpeningCard key={item.id} opening={item} to="/operations/job-openings" state={{ openingId: item.id }} />)}</div> : <EmptyState />}
+        {data?.recentOpenings?.length ? <RecentOpeningsSlider openings={data.recentOpenings} to="/operations/job-openings" /> : <EmptyState />}
       </section>
       <section className="dashboard-section animate-dashboard-enter" style={{ animationDelay: "620ms" }}>
         <div className="dashboard-section-header">
