@@ -16,6 +16,7 @@ export default function StudentAppliedJobs() {
   const [filterOptions, setFilterOptions] = useState({});
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
+  const [company, setCompany] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
@@ -30,8 +31,8 @@ export default function StudentAppliedJobs() {
 
   useEffect(() => {
     setLoading(true);
-    handleGetStudentApplications({ search, status, limit: 1000 }).then((data) => setApplications(data || [])).finally(() => setLoading(false));
-  }, [search, status]);
+    handleGetStudentApplications({ search, status, company, limit: 1000 }).then((data) => setApplications(data || [])).finally(() => setLoading(false));
+  }, [company, search, status]);
 
   const withdraw = async () => {
     setWithdrawing(true);
@@ -61,7 +62,7 @@ export default function StudentAppliedJobs() {
   return (
     <div className="page-shell">
       <h1 className="page-heading">Applied Jobs</h1>
-      <AppliedJobFilters search={search} onSearch={(value) => { setSearch(value); setPage(1); }} status={status} options={filterOptions} onStatus={(value) => { setStatus(value); setPage(1); }} onClear={() => { setSearch(""); setStatus(""); setPage(1); }} />
+      <AppliedJobFilters search={search} onSearch={(value) => { setSearch(value); setPage(1); }} status={status} company={company} options={filterOptions} onStatus={(value) => { setStatus(value); setPage(1); }} onCompany={(value) => { setCompany(value); setPage(1); }} onClear={() => { setSearch(""); setStatus(""); setCompany(""); setPage(1); }} />
       {loading ? (
         <PageLoader />
       ) : (

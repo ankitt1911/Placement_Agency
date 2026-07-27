@@ -17,7 +17,7 @@ export default function StudentOpenings() {
   const [openings, setOpenings] = useState([]);
   const [filterOptions, setFilterOptions] = useState({});
   const [search, setSearch] = useState("");
-  const [filters, setFilters] = useState({ location: "", jobType: "", category: "" });
+  const [filters, setFilters] = useState({ company: "", location: "", jobType: "", category: "" });
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
@@ -74,7 +74,7 @@ export default function StudentOpenings() {
   return (
     <div className="page-shell">
       <h1 className="page-heading">Openings</h1>
-      <OpeningFilters search={search} onSearch={(value) => { setSearch(value); setPage(1); }} filters={filters} options={filterOptions} onFilter={(field, value) => { setFilters({ ...filters, [field]: value }); setPage(1); }} onClear={() => { setFilters({ location: "", jobType: "", category: "" }); setSearch(""); setPage(1); }} />
+      <OpeningFilters search={search} onSearch={(value) => { setSearch(value); setPage(1); }} filters={filters} options={filterOptions} onFilter={(field, value) => { setFilters({ ...filters, [field]: value }); setPage(1); }} onClear={() => { setFilters({ company: "", location: "", jobType: "", category: "" }); setSearch(""); setPage(1); }} />
       {loading ? (
         <PageLoader />
       ) : (

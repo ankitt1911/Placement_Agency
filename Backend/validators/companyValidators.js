@@ -3,7 +3,6 @@ const Joi = require("joi");
 const companyShape = {
   name: Joi.string().trim(),
   industry: Joi.string().allow("", null),
-  address: Joi.string().allow("", null),
   locations: Joi.array().items(Joi.string()),
   website: Joi.string().allow("", null),
   logo: Joi.string().allow("", null),

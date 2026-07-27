@@ -11,7 +11,6 @@ import IndiaStateCitySelect from "../../custom/indiaStateCitySelect";
 const initialForm = {
   name: "",
   industry: "",
-  address: "",
   locations: "",
   website: "",
   logo: "",
@@ -28,7 +27,6 @@ const isValidUrlOrUploadPath = (value) => !value || value.startsWith("/uploads/"
 const getCompanyForm = (company) => ({
   name: company?.name || "",
   industry: company?.industry || "",
-  address: company?.address || "",
   locations: join(company?.locations),
   website: company?.website || "",
   logo: company?.logo || "",
@@ -41,7 +39,6 @@ const getCompanyForm = (company) => ({
 const companyExportColumns = [
   { key: "name", label: "Name" },
   { key: "industry", label: "Industry" },
-  { key: "address", label: "Address" },
   { key: "locations", label: "Locations" },
   { key: "website", label: "Website" },
   { key: "logo", label: "Logo" },
@@ -90,7 +87,6 @@ function CompanyFormModal({ open, company, onClose, onSaved }) {
     const payload = {
       name: form.name,
       industry: form.industry,
-      address: form.address,
       locations: split(form.locations),
       website: form.website,
       logo: form.logo,
@@ -143,10 +139,6 @@ function CompanyFormModal({ open, company, onClose, onSaved }) {
               <label>
                 <span className="form-label">Industry</span>
                 <input className="form-input" value={form.industry} onChange={(event) => update("industry", event.target.value)} />
-              </label>
-              <label className="md:col-span-2">
-                <span className="form-label">Address</span>
-                <IndiaStateCitySelect value={form.address} onChange={(value) => update("address", value)} />
               </label>
               <label className="md:col-span-2">
                 <span className="form-label">Locations</span>

@@ -4,6 +4,11 @@ const JobOpening = require("../models/jobOpeningModel");
 const { parseSearchTerms, regexForTerm } = require("../utils/searchUtils");
 
 const compactOptions = (values) => [...new Set(values.flat().filter(Boolean).map(String))].sort();
+const companyOptions = (companies) => companies
+  .filter(Boolean)
+  .map((company) => ({ label: company.name, value: String(company._id) }))
+  .filter((option, index, options) => options.findIndex((item) => item.value === option.value) === index)
+  .sort((first, second) => first.label.localeCompare(second.label));
 const fetchMyApplications = async (req, res) => {
   try {
     if (req.user.role !== "student") return res.status(403).json({ success: false, message: "Access denied", statusCode: 403 });
@@ -11,6 +16,10 @@ const fetchMyApplications = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const query = { student: req.user.mongoId };
     if (req.query.status) query.status = req.query.status;
+    if (req.query.company) {
+      const jobs = await JobOpening.find({ company: req.query.company }).select("_id").lean();
+      query.job = { $in: jobs.map((job) => job._id) };
+    }
     const searchTerms = parseSearchTerms(req.query.search);
     if (searchTerms.length) query.$and = await Promise.all(searchTerms.map(async (term) => {
       const pattern = regexForTerm(term);
@@ -29,8 +38,14 @@ const fetchMyApplications = async (req, res) => {
 const fetchMyApplicationFilterOptions = async (req, res) => {
   try {
     if (req.user.role !== "student") return res.status(403).json({ success: false, message: "Access denied", statusCode: 403 });
-    const applications = await Application.find({ student: req.user.mongoId }).select("status").lean();
-    const data = { status: compactOptions(applications.map((application) => application.status)) };
+    const applications = await Application.find({ student: req.user.mongoId })
+      .select("status job")
+      .populate({ path: "job", select: "company", populate: { path: "company", select: "name" } })
+      .lean();
+    const data = {
+      company: companyOptions(applications.map((application) => application.job && application.job.company)),
+      status: compactOptions(applications.map((application) => application.status)),
+    };
     return res.status(200).json({ success: true, data, statusCode: 200 });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message, statusCode: 500 });

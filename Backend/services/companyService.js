@@ -27,7 +27,6 @@ const joinList = (value) => Array.isArray(value) ? value.filter(Boolean).join(",
 const companyExportColumns = [
   { key: "name", label: "Name", value: (company) => company.name },
   { key: "industry", label: "Industry", value: (company) => company.industry },
-  { key: "address", label: "Address", value: (company) => company.address },
   { key: "locations", label: "Locations", value: (company) => joinList(company.locations) },
   { key: "website", label: "Website", value: (company) => company.website },
   { key: "logo", label: "Logo", value: (company) => company.logo },
@@ -54,7 +53,7 @@ const fetchGetCompanies = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const query = companyQuery(req.query);
-    const data = await Company.find(query).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean();
+    const data = await Company.find(query).select("-address").sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean();
     const total = await Company.countDocuments(query);
     return res.status(200).json({ success: true, total, page, limit, data, statusCode: 200 });
   } catch (error) {
@@ -75,7 +74,7 @@ const fetchCreateCompany = async (req, res) => {
 const fetchGetCompanyDetail = async (req, res) => {
   try {
     if (!requireOps(req, res)) return;
-    const company = await Company.findById(req.params.id).lean();
+    const company = await Company.findById(req.params.id).select("-address").lean();
     if (!company) return res.status(404).json({ success: false, message: "Company not found", statusCode: 404 });
     return res.status(200).json({ success: true, data: company, statusCode: 200 });
   } catch (error) {
@@ -152,7 +151,7 @@ const fetchPublicCompanies = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const query = companyQuery(req.query, true);
-  const data = await Company.find(query).select("-createdBy").skip((page - 1) * limit).limit(limit).lean();
+  const data = await Company.find(query).select("-createdBy -address").skip((page - 1) * limit).limit(limit).lean();
   const total = await Company.countDocuments(query);
   return res.status(200).json({ success: true, total, page, limit, data, statusCode: 200 });
 };
