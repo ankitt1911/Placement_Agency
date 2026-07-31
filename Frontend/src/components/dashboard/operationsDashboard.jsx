@@ -8,10 +8,14 @@ import PageLoader from "../loader/PageLoader";
 import ApplicationSummaryCard from "./applicationSummaryCard";
 import DashboardStatCard from "./dashboardStatCard";
 import RecentOpeningsSlider from "./recentOpeningsSlider";
+import { CompanyFormModal } from "../operations/companyManagement/companyManagement";
+import { OpeningFormModal } from "../operations/jobOpeningManagement/jobOpeningManagement";
 
 export default function OperationsDashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [addCompanyOpen, setAddCompanyOpen] = useState(false);
+  const [createOpeningOpen, setCreateOpeningOpen] = useState(false);
   const loggedInName = useSelector((state) => state.auth.user?.name);
 
   useEffect(() => {
@@ -47,8 +51,8 @@ export default function OperationsDashboard() {
             <p className="mt-2 text-sm font-medium leading-6 text-portal-muted">Monitor students, companies, openings, and applications with a lively operations snapshot.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Link className="secondary-btn" to="/operations/companies">Add company</Link>
-            <Link className="secondary-btn" to="/operations/job-openings">Create opening</Link>
+            <button className="secondary-btn" type="button" onClick={() => setAddCompanyOpen(true)}>Add company</button>
+            <button className="secondary-btn" type="button" onClick={() => setCreateOpeningOpen(true)}>Create opening</button>
             <Link className="primary-btn" to="/operations/applied-students">View applicants<ArrowRight className="h-4 w-4" /></Link>
           </div>
         </div>
@@ -78,6 +82,16 @@ export default function OperationsDashboard() {
         </div>
         {data?.recentApplications?.length ? <div className="grid gap-3">{data.recentApplications.map((item) => <ApplicationSummaryCard key={item.id} application={item} />)}</div> : <EmptyState />}
       </section>
+      <CompanyFormModal
+        open={addCompanyOpen}
+        onClose={() => setAddCompanyOpen(false)}
+        onSaved={async () => setData(await handleGetOperationsDashboard())}
+      />
+      <OpeningFormModal
+        open={createOpeningOpen}
+        onClose={() => setCreateOpeningOpen(false)}
+        onSaved={async () => setData(await handleGetOperationsDashboard())}
+      />
     </div>
   );
 }
