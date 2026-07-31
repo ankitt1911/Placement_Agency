@@ -79,7 +79,7 @@ const jobExportColumns = [
   { key: "updatedAt", label: "Updated At" },
 ];
 
-function OpeningFormModal({ open, opening, onClose, onSaved }) {
+export function OpeningFormModal({ open, opening, onClose, onSaved }) {
   const isEdit = Boolean(opening?.id);
   const [form, setForm] = useState(initialForm);
   const [companies, setCompanies] = useState([]);

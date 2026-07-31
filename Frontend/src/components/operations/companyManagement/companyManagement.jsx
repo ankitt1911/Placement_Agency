@@ -53,7 +53,7 @@ const companyExportColumns = [
   { key: "updatedAt", label: "Updated At" },
 ];
 
-function CompanyFormModal({ open, company, onClose, onSaved }) {
+export function CompanyFormModal({ open, company, onClose, onSaved }) {
   const isEdit = Boolean(company?.id);
   const [form, setForm] = useState(initialForm);
   const [saving, setSaving] = useState(false);

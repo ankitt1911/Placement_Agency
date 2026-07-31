@@ -1,5 +1,4 @@
 import { BriefcaseBusiness, CalendarDays, ChevronRight, Sparkles } from "lucide-react";
-import CustomButton from "../custom/customButton";
 import StatusBadge from "../custom/statusBadge";
 
 export default function AppliedJobCard({ application, onDetails, onWithdraw }) {
@@ -29,7 +28,6 @@ export default function AppliedJobCard({ application, onDetails, onWithdraw }) {
               Withdraw<ChevronRight className="h-3.5 w-3.5" />
             </button>
           ) : null}
-          <CustomButton variant="secondary" className="rounded-full px-3 py-1.5 text-xs" onClick={() => onDetails(application)}>Track</CustomButton>
         </div>
       </div>
     </article>
