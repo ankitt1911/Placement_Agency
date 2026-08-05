@@ -11,7 +11,7 @@ import AppliedJobCard from "./appliedJobCard";
 import AppliedJobFilters from "./appliedJobFilters";
 import WithdrawApplicationModal from "./withdrawApplicationModal";
 
-export default function StudentAppliedJobs() {
+export default function StudentAppliedJobs({ openLinkOnly = false }) {
   const [applications, setApplications] = useState([]);
   const [filterOptions, setFilterOptions] = useState({});
   const [search, setSearch] = useState("");
@@ -24,15 +24,16 @@ export default function StudentAppliedJobs() {
   const [withdrawTarget, setWithdrawTarget] = useState(null);
   const [withdrawing, setWithdrawing] = useState(false);
   const limit = 5;
+  const appliedFromOpenLink = openLinkOnly;
 
   useEffect(() => {
-    handleGetStudentApplicationFilterOptions().then((data) => setFilterOptions(data || {}));
-  }, []);
+    handleGetStudentApplicationFilterOptions({ appliedFromOpenLink }).then((data) => setFilterOptions(data || {}));
+  }, [appliedFromOpenLink]);
 
   useEffect(() => {
     setLoading(true);
-    handleGetStudentApplications({ search, status, company, limit: 1000 }).then((data) => setApplications(data || [])).finally(() => setLoading(false));
-  }, [company, search, status]);
+    handleGetStudentApplications({ search, status, company, appliedFromOpenLink, limit: 1000 }).then((data) => setApplications(data || [])).finally(() => setLoading(false));
+  }, [appliedFromOpenLink, company, search, status]);
 
   const withdraw = async () => {
     setWithdrawing(true);
@@ -61,13 +62,14 @@ export default function StudentAppliedJobs() {
 
   return (
     <div className="page-shell">
-      <h1 className="page-heading">Applied Jobs</h1>
+      <h1 className="page-heading">{openLinkOnly ? "Open Application" : "Applied Jobs"}</h1>
+      {openLinkOnly ? <p className="mb-4 text-sm font-semibold text-portal-muted">Applications you submitted through a shared open link.</p> : null}
       <AppliedJobFilters search={search} onSearch={(value) => { setSearch(value); setPage(1); }} status={status} company={company} options={filterOptions} onStatus={(value) => { setStatus(value); setPage(1); }} onCompany={(value) => { setCompany(value); setPage(1); }} onClear={() => { setSearch(""); setStatus(""); setCompany(""); setPage(1); }} />
       {loading ? (
         <PageLoader />
       ) : (
         <>
-          {visible.length ? <div className="grid gap-4">{visible.map((item) => <AppliedJobCard key={item.id} application={item} onDetails={viewDetails} onWithdraw={setWithdrawTarget} />)}</div> : <EmptyState title="No applied jobs found" />}
+          {visible.length ? <div className="grid gap-4">{visible.map((item) => <AppliedJobCard key={item.id} application={item} onDetails={viewDetails} onWithdraw={setWithdrawTarget} />)}</div> : <EmptyState title={openLinkOnly ? "No open link applications found" : "No applied jobs found"} />}
           <Pagination page={page} total={applications.length} limit={limit} onChange={setPage} />
         </>
       )}

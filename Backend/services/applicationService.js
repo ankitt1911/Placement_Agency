@@ -15,6 +15,7 @@ const fetchMyApplications = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const query = { student: req.user.mongoId };
+    if (req.query.appliedFromOpenLink !== undefined) query.appliedFromOpenLink = String(req.query.appliedFromOpenLink) === "true";
     if (req.query.status) query.status = req.query.status;
     if (req.query.company) {
       const jobs = await JobOpening.find({ company: req.query.company }).select("_id").lean();
@@ -38,7 +39,9 @@ const fetchMyApplications = async (req, res) => {
 const fetchMyApplicationFilterOptions = async (req, res) => {
   try {
     if (req.user.role !== "student") return res.status(403).json({ success: false, message: "Access denied", statusCode: 403 });
-    const applications = await Application.find({ student: req.user.mongoId })
+    const optionsQuery = { student: req.user.mongoId };
+    if (req.query.appliedFromOpenLink !== undefined) optionsQuery.appliedFromOpenLink = String(req.query.appliedFromOpenLink) === "true";
+    const applications = await Application.find(optionsQuery)
       .select("status job")
       .populate({ path: "job", select: "company", populate: { path: "company", select: "name" } })
       .lean();

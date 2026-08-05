@@ -32,7 +32,7 @@ const handleApplyToOpening = async ({ openingId }) => {
 };
 
 const handleGetStudentApplications = async (params = {}) => asList(await GetStudentApplicationsApi(params)).map(mapApplication);
-const handleGetStudentApplicationFilterOptions = async () => unwrapFilterOptions(await GetStudentApplicationFilterOptionsApi());
+const handleGetStudentApplicationFilterOptions = async (params = {}) => unwrapFilterOptions(await GetStudentApplicationFilterOptionsApi(params));
 const handleGetApplicationDetails = async (id) => mapApplication(unwrapData(await GetApplicationDetailsApi(id), {}));
 const handleWithdrawApplication = async ({ applicationId }) => unwrapData(await WithdrawApplicationApi(applicationId), {});
 

@@ -17,6 +17,7 @@ import StudentManagementPage from "./pages/operations/studentManagementPage";
 import OpenLinkApplicationPage from "./pages/openLinkApplicationPage";
 import ProfilePage from "./pages/profile/profilePage";
 import StudentAppliedJobsPage from "./pages/studentAppliedJobs/studentAppliedJobsPage";
+import StudentOpenApplicationsPage from "./pages/studentAppliedJobs/studentOpenApplicationsPage";
 import StudentOpeningsPage from "./pages/studentOpenings/studentOpeningsPage";
 import IssuesPage from "./pages/issues/issuesPage";
 
@@ -54,6 +55,7 @@ export default function App() {
             <Route path="/student/profile" element={<ProfilePage />} />
             <Route path="/student/openings" element={<StudentOpeningsPage />} />
             <Route path="/student/applied-jobs" element={<StudentAppliedJobsPage />} />
+            <Route path="/student/open-applications" element={<StudentOpenApplicationsPage />} />
             <Route path="/student/issues" element={<IssuesPage />} />
           </Route>
         </Route>

@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, Building2, ClipboardList, LayoutDashboard, Ticket, UserRound, UsersRound } from "lucide-react";
+import { BriefcaseBusiness, Building2, ClipboardList, LayoutDashboard, Link2, Ticket, UserRound, UsersRound } from "lucide-react";
 
 export const roleHome = {
   student: "/student/dashboard",
@@ -11,6 +11,7 @@ export const navItems = {
     { label: "Profile", path: "/student/profile", icon: UserRound },
     { label: "Openings", path: "/student/openings", icon: BriefcaseBusiness },
     { label: "Applied Jobs", path: "/student/applied-jobs", icon: ClipboardList },
+    { label: "Open Application", path: "/student/open-applications", icon: Link2 },
     { label: "Raise An Issue", path: "/student/issues", icon: Ticket }
   ],
   operations: [
