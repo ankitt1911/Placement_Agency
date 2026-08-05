@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { handleChangeApplicantStatus, handleDownloadApplicantResume, handleExportApplicantsExcel, handleGetApplicantFilterOptions, handleGetApplicants } from "../../../Services/apiCalling/appliedStudentsApis";
 import { downloadBlob } from "../../../Utlis/Common/commonMethod";
+import ScheduleInterviewModal from "../interviews/scheduleInterviewModal";
 import OperationsList from "../shared/OperationsList";
 import AppliedStudentDetails from "./appliedStudentDetails";
 
@@ -71,6 +73,7 @@ const appliedStudentExportColumns = [
 ];
 
 export default function AppliedStudents({ openLinkOnly = false }) {
+  const [scheduling, setScheduling] = useState(null);
   const statusAction = (label, status) => ({
     label,
     message: (row) => `${label} ${row.student}?`,
@@ -80,24 +83,35 @@ export default function AppliedStudents({ openLinkOnly = false }) {
     disabled: (row) => row.status === status
   });
   return (
-    <OperationsList
-      title={openLinkOnly ? "Open Link Applications" : "Applied Students"}
-      searchPlaceholder="Search applicant, company, role, college, skills"
-      fetchItems={(params) => handleGetApplicants(openLinkOnly ? { ...params, appliedFromOpenLink: true } : params)}
-      fetchFilterOptions={() => handleGetApplicantFilterOptions(openLinkOnly ? { appliedFromOpenLink: true } : {})}
-      searchKeys={["student", "company", "role", "college", "skills"]}
-      columns={[{ key: "student", label: "Student" }, { key: "company", label: "Company" }, { key: "role", label: "Role" }, { key: "college", label: "College" }, { key: "location", label: "Location" }, { key: "cgpa", label: "CGPA" }, { key: "skills", label: "Skills" }, { key: "backlogs", label: "Backlogs" }, { key: "status", label: "Status" }]}
-      filterConfig={[{ key: "company", label: "Company" }, { key: "college", label: "College" }, { key: "status", label: "Status" }, { key: "location", label: "Location" }]}
-      statusActions={[
-        statusAction("Reject", "Rejected"),
-        statusAction("Shortlist", "Shortlisted"),
-        statusAction("Select", "Selected"),
-        { label: "Resume", message: (row) => `Download resume for ${row.student}?`, run: async (row) => downloadBlob(await handleDownloadApplicantResume(row), row.resume), update: (rows) => rows, success: "Resume downloaded" }
-      ]}
-      exportAction={(params) => handleExportApplicantsExcel(openLinkOnly ? { ...params, appliedFromOpenLink: true } : params)}
-      exportColumns={appliedStudentExportColumns}
-      detailContent={(row) => <AppliedStudentDetails application={row} />}
-      rowDetail={(row) => row ? Object.entries(row).map(([key, value]) => <p key={key}><b>{key}:</b> {String(value)}</p>) : null}
-    />
+    <>
+      <OperationsList
+        title={openLinkOnly ? "Open Link Applications" : "Applied Students"}
+        searchPlaceholder="Search applicant, company, role, college, skills"
+        fetchItems={(params) => handleGetApplicants(openLinkOnly ? { ...params, appliedFromOpenLink: true } : params)}
+        fetchFilterOptions={() => handleGetApplicantFilterOptions(openLinkOnly ? { appliedFromOpenLink: true } : {})}
+        searchKeys={["student", "company", "role", "college", "skills"]}
+        primaryText={(row) => row.student || "Applicant"}
+        primaryMeta={(row) => row.role}
+        columns={[{ key: "student", label: "Student" }, { key: "company", label: "Company" }, { key: "role", label: "Role" }, { key: "college", label: "College" }, { key: "location", label: "Location" }, { key: "cgpa", label: "CGPA" }, { key: "skills", label: "Skills" }, { key: "backlogs", label: "Backlogs" }, { key: "status", label: "Status" }]}
+        filterConfig={[{ key: "company", label: "Company" }, { key: "role", label: "Role" }, { key: "college", label: "College" }, { key: "status", label: "Status" }, { key: "location", label: "Location" }]}
+        statusActions={[
+          statusAction("Reject", "Rejected"),
+          statusAction("Shortlist", "Shortlisted"),
+          statusAction("Select", "Selected"),
+          { label: "Schedule Interview", onClick: (row) => setScheduling(row), disabled: (row) => row.status === "Withdrawn" },
+          { label: "Resume", message: (row) => `Download resume for ${row.student}?`, run: async (row) => downloadBlob(await handleDownloadApplicantResume(row), row.resume), update: (rows) => rows, success: "Resume downloaded" }
+        ]}
+        exportAction={(params) => handleExportApplicantsExcel(openLinkOnly ? { ...params, appliedFromOpenLink: true } : params)}
+        exportColumns={appliedStudentExportColumns}
+        hiddenListKeys={["student", "role"]}
+        detailContent={(row) => <AppliedStudentDetails application={row} />}
+        rowDetail={(row) => row ? Object.entries(row).map(([key, value]) => <p key={key}><b>{key}:</b> {String(value)}</p>) : null}
+      />
+      <ScheduleInterviewModal
+        open={Boolean(scheduling)}
+        application={scheduling}
+        onClose={() => setScheduling(null)}
+      />
+    </>
   );
 }

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { ArrowRight, BriefcaseBusiness, Building2, CheckCircle2, ClipboardList, LockKeyhole, Sparkles, UsersRound } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, Building2, CheckCircle2, ClipboardList, LockKeyhole, Radio, Sparkles, UsersRound } from "lucide-react";
 import { handleGetOperationsDashboard } from "../../Services/apiCalling/dashboardApis";
+import BroadcastManagerModal from "../broadcasts/broadcastManagerModal";
 import EmptyState from "../custom/emptyState";
 import PageLoader from "../loader/PageLoader";
 import ApplicationSummaryCard from "./applicationSummaryCard";
@@ -16,6 +17,7 @@ export default function OperationsDashboard() {
   const [loading, setLoading] = useState(true);
   const [addCompanyOpen, setAddCompanyOpen] = useState(false);
   const [createOpeningOpen, setCreateOpeningOpen] = useState(false);
+  const [broadcastOpen, setBroadcastOpen] = useState(false);
   const loggedInName = useSelector((state) => state.auth.user?.name);
 
   useEffect(() => {
@@ -51,6 +53,10 @@ export default function OperationsDashboard() {
             <p className="mt-2 text-sm font-medium leading-6 text-portal-muted">Monitor students, companies, openings, and applications with a lively operations snapshot.</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <button className="secondary-btn border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100" type="button" onClick={() => setBroadcastOpen(true)}>
+              <Radio className="h-4 w-4" />
+              Broadcast
+            </button>
             <button className="secondary-btn" type="button" onClick={() => setAddCompanyOpen(true)}>Add company</button>
             <button className="secondary-btn" type="button" onClick={() => setCreateOpeningOpen(true)}>Create opening</button>
             <Link className="primary-btn" to="/operations/applied-students">View applicants<ArrowRight className="h-4 w-4" /></Link>
@@ -92,6 +98,7 @@ export default function OperationsDashboard() {
         onClose={() => setCreateOpeningOpen(false)}
         onSaved={async () => setData(await handleGetOperationsDashboard())}
       />
+      <BroadcastManagerModal open={broadcastOpen} onClose={() => setBroadcastOpen(false)} />
     </div>
   );
 }

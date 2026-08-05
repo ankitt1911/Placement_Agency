@@ -125,6 +125,48 @@ export const mapApplication = (application = {}) => {
   };
 };
 
+export const toLocalDateKey = (value) => {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+};
+
+export const mapInterview = (interview = {}) => {
+  const job = interview.job || {};
+  const company = interview.company || job.company || {};
+  const scheduledAt = interview.scheduledAt ? new Date(interview.scheduledAt) : null;
+  const valid = scheduledAt && !Number.isNaN(scheduledAt.getTime());
+
+  return {
+    ...interview,
+    id: interview._id || interview.id,
+    applicationId: interview.application?._id || interview.application || "",
+    student: interview.student?.name || interview.student?.user?.name || "",
+    email: interview.student?.email || interview.student?.user?.email || "",
+    mobile: interview.student?.mobile || "",
+    college: interview.student?.academicDetails?.college || "",
+    company: company.name || "",
+    companyId: String(company._id || ""),
+    role: job.title || "",
+    location: interview.location || join(job.location) || join(company.locations),
+    scheduledAt: interview.scheduledAt || "",
+    dateKey: valid ? toLocalDateKey(scheduledAt) : "",
+    timeLabel: valid ? scheduledAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "",
+    dateTimeLabel: valid ? scheduledAt.toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "",
+    durationMinutes: interview.durationMinutes || 60,
+    mode: interview.mode || "Online",
+    round: interview.round || "",
+    meetingLink: interview.meetingLink || "",
+    interviewerName: interview.interviewerName || "",
+    interviewerEmail: interview.interviewerEmail || "",
+    status: interview.status || "Scheduled",
+    feedback: interview.feedback || "",
+    scheduledByName: interview.scheduledBy?.name || "",
+    updatedByName: interview.updatedBy?.name || "",
+    noteList: (interview.notes || []).map((note) => ({ text: note.text, date: (note.date || "").slice(0, 10) }))
+  };
+};
+
 export const mapStudent = (profile = {}) => ({
   ...profile,
   id: profile._id || profile.id,
@@ -156,6 +198,32 @@ export const mapIssue = (issue = {}) => ({
   updatedDate: (issue.updatedAt || "").slice(0, 10),
   closedDate: (issue.closedAt || "").slice(0, 10)
 });
+
+export const mapBroadcast = (broadcast = {}) => {
+  const now = new Date();
+  const startsAt = broadcast.startsAt ? new Date(broadcast.startsAt) : null;
+  const endsAt = broadcast.endsAt ? new Date(broadcast.endsAt) : null;
+  const started = !startsAt || startsAt <= now;
+  const ended = Boolean(endsAt && endsAt < now);
+
+  return {
+    ...broadcast,
+    id: broadcast._id || broadcast.id,
+    title: broadcast.title || "",
+    message: broadcast.message || "",
+    category: broadcast.category || "Announcement",
+    priority: broadcast.priority || "Normal",
+    linkUrl: broadcast.linkUrl || "",
+    linkLabel: broadcast.linkLabel || "",
+    isActive: broadcast.isActive !== false,
+    startsAtDate: broadcast.startsAt?.slice?.(0, 10) || "",
+    endsAtDate: broadcast.endsAt?.slice?.(0, 10) || "",
+    createdByName: broadcast.createdBy?.name || "",
+    createdDate: (broadcast.createdAt || "").slice(0, 10),
+    ongoing: broadcast.isActive !== false && started && !ended,
+    state: broadcast.isActive === false ? "Stopped" : !started ? "Scheduled" : ended ? "Expired" : "Ongoing"
+  };
+};
 
 export const mapProfileToUi = (profile = {}) => ({
   personal: {

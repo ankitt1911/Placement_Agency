@@ -1,5 +1,6 @@
 const path = require("path");
 const Application = require("../models/applicationModel");
+const JobOpening = require("../models/jobOpeningModel");
 const StudentProfile = require("../models/studentProfileModel");
 const { exportExcel } = require("../utils/exportExcel");
 const { parseSearchTerms } = require("../utils/searchUtils");
@@ -122,6 +123,7 @@ const fetchGetApplications = async (req, res) => {
   const filtered = enriched
     .filter((application) => !req.query.company || String(application.job && application.job.company && application.job.company._id) === String(req.query.company))
     .filter((application) => !req.query.college || String(application.student && application.student.academicDetails && application.student.academicDetails.college) === String(req.query.college))
+    .filter((application) => !req.query.role || String(application.job && application.job.title) === String(req.query.role))
     .filter((application) => {
       if (!req.query.location) return true;
       const companyLocations = (application.job && application.job.company && application.job.company.locations) || [];
@@ -166,8 +168,14 @@ const fetchGetApplicationFilterOptions = async (req, res) => {
     const applications = await Application.find(query).populate("student", "name email").populate({ path: "job", populate: { path: "company", select: "name locations" } }).select("status job student").lean();
     const enriched = await withStudentProfiles(applications);
     const companies = applications.map((application) => application.job && application.job.company).filter(Boolean);
+    // On the open-link tab the role options only make sense for openings that are
+    // actually collecting open-link applications.
+    const openingQuery = { status: "Open" };
+    if (String(req.query.appliedFromOpenLink) === "true") openingQuery["openLink.isActive"] = true;
+    const activeOpenings = await JobOpening.find(openingQuery).select("title").lean();
     const data = {
       company: companies.map((company) => ({ label: company.name, value: String(company._id) })).filter((option, index, options) => options.findIndex((item) => item.value === option.value) === index).sort((a, b) => a.label.localeCompare(b.label)),
+      role: compactOptions(activeOpenings.map((opening) => opening.title)),
       college: compactOptions(enriched.map((application) => application.student && application.student.academicDetails && application.student.academicDetails.college)),
       status: compactOptions(applications.map((application) => application.status)),
       location: compactOptions(applications.map((application) => [
@@ -192,6 +200,7 @@ const fetchExportApplications = async (req, res) => {
   const filtered = enriched
     .filter((application) => !req.query.company || String(application.job && application.job.company && application.job.company._id) === String(req.query.company))
     .filter((application) => !req.query.college || String(application.student && application.student.academicDetails && application.student.academicDetails.college) === String(req.query.college))
+    .filter((application) => !req.query.role || String(application.job && application.job.title) === String(req.query.role))
     .filter((application) => {
       if (!req.query.location) return true;
       const companyLocations = (application.job && application.job.company && application.job.company.locations) || [];

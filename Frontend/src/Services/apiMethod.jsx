@@ -67,7 +67,24 @@ export const ChangeApplicantStatusApi = (id, params) => apiRequest(apiConstant.c
 export const DownloadApplicantResumeApi = (id) => apiRequest(apiConstant.downloadApplicantResume(id), "Get", {}, false, {}, "blob");
 export const ExportApplicantsExcelApi = (params) => apiRequest(apiConstant.exportApplicantsExcel, "Get", params, false, {}, "blob");
 
+export const GetMyInterviewsApi = (params) => apiRequest(apiConstant.getMyInterviews, "Get", params);
+export const GetInterviewsApi = (params) => apiRequest(apiConstant.getInterviews, "Get", params);
+export const GetInterviewFilterOptionsApi = (params) => apiRequest(apiConstant.getInterviewFilterOptions, "Get", params);
+export const ExportInterviewsExcelApi = (params) => apiRequest(apiConstant.exportInterviewsExcel, "Get", params, false, {}, "blob");
+export const ScheduleInterviewApi = (params) => apiRequest(apiConstant.scheduleInterview, "Post", params, true);
+export const GetInterviewDetailsApi = (id) => apiRequest(apiConstant.getInterviewDetails(id), "Get");
+export const UpdateInterviewApi = (id, params) => apiRequest(apiConstant.updateInterview(id), "Put", params, true);
+export const UpdateInterviewStatusApi = (id, params) => apiRequest(apiConstant.updateInterviewStatus(id), "Patch", params, true);
+export const DeleteInterviewApi = (id) => apiRequest(apiConstant.deleteInterview(id), "Delete", {}, true);
+
 export const GetMyIssuesApi = (params) => apiRequest(apiConstant.getMyIssues, "Get", params);
 export const GetRaisedIssuesApi = (params) => apiRequest(apiConstant.getRaisedIssues, "Get", params);
 export const CreateIssueApi = (params) => apiRequest(apiConstant.createIssue, "Post", params, true);
 export const UpdateIssueStatusApi = (id, params) => apiRequest(apiConstant.updateIssueStatus(id), "Patch", params, true);
+
+export const GetActiveBroadcastsApi = () => apiRequest(apiConstant.getActiveBroadcasts, "Get");
+export const GetBroadcastsApi = (params) => apiRequest(apiConstant.getBroadcasts, "Get", params);
+export const CreateBroadcastApi = (params) => apiRequest(apiConstant.createBroadcast, "Post", params, true);
+export const UpdateBroadcastApi = (id, params) => apiRequest(apiConstant.updateBroadcast(id), "Put", params, true);
+export const ToggleBroadcastApi = (id) => apiRequest(apiConstant.toggleBroadcast(id), "Patch", {}, true);
+export const DeleteBroadcastApi = (id) => apiRequest(apiConstant.deleteBroadcast(id), "Delete", {}, true);

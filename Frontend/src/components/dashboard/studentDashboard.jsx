@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { ArrowRight, BriefcaseBusiness, CheckCircle2, ClipboardList, UserRoundCheck } from "lucide-react";
 import { handleGetStudentDashboard } from "../../Services/apiCalling/dashboardApis";
+import StudentBroadcastBanner from "../broadcasts/studentBroadcastBanner";
 import EmptyState from "../custom/emptyState";
 import PageLoader from "../loader/PageLoader";
 import ApplicationSummaryCard from "./applicationSummaryCard";
@@ -36,6 +37,7 @@ export default function StudentDashboard() {
           </div>
         </div>
       </section>
+      <StudentBroadcastBanner />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="animate-dashboard-enter" style={{ animationDelay: "80ms" }}><DashboardStatCard label="Profile completion" value={`${summary.profileCompletion || 0}%`} icon={UserRoundCheck} /></div>
         <div className="animate-dashboard-enter" style={{ animationDelay: "140ms" }}><DashboardStatCard label="Total openings" value={summary.totalOpenings || 0} icon={BriefcaseBusiness} /></div>

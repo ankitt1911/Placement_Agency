@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, Building2, ClipboardList, LayoutDashboard, Link2, Ticket, UserRound, UsersRound } from "lucide-react";
+import { BriefcaseBusiness, Building2, CalendarDays, ClipboardList, LayoutDashboard, Link2, Ticket, UserRound, UsersRound } from "lucide-react";
 
 export const roleHome = {
   student: "/student/dashboard",
@@ -11,6 +11,7 @@ export const navItems = {
     { label: "Profile", path: "/student/profile", icon: UserRound },
     { label: "Openings", path: "/student/openings", icon: BriefcaseBusiness },
     { label: "Applied Jobs", path: "/student/applied-jobs", icon: ClipboardList },
+    { label: "Interviews", path: "/student/interviews", icon: CalendarDays },
     { label: "Open Application", path: "/student/open-applications", icon: Link2 },
     { label: "Raise An Issue", path: "/student/issues", icon: Ticket }
   ],
@@ -21,6 +22,7 @@ export const navItems = {
     { label: "Job Openings", path: "/operations/job-openings", icon: BriefcaseBusiness },
     { label: "Applied Students", path: "/operations/applied-students", icon: ClipboardList },
     { label: "Open Link Applications", path: "/operations/open-link-applications", icon: ClipboardList },
+    { label: "Interviews", path: "/operations/interviews", icon: CalendarDays },
     { label: "Raise An Issue", path: "/operations/issues", icon: Ticket }
   ]
 };
