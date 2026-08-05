@@ -11,12 +11,14 @@ import RegisterPage from "./pages/auth/registerPage";
 import StudentDashboardPage from "./pages/dashboard/studentDashboardPage";
 import AppliedStudentsPage from "./pages/operations/appliedStudentsPage";
 import CompanyManagementPage from "./pages/operations/companyManagementPage";
+import InterviewsPage from "./pages/operations/interviewsPage";
 import JobOpeningManagementPage from "./pages/operations/jobOpeningManagementPage";
 import OperationsDashboardPage from "./pages/operations/operationsDashboardPage";
 import StudentManagementPage from "./pages/operations/studentManagementPage";
 import OpenLinkApplicationPage from "./pages/openLinkApplicationPage";
 import ProfilePage from "./pages/profile/profilePage";
 import StudentAppliedJobsPage from "./pages/studentAppliedJobs/studentAppliedJobsPage";
+import StudentInterviewsPage from "./pages/studentInterviews/studentInterviewsPage";
 import StudentOpenApplicationsPage from "./pages/studentAppliedJobs/studentOpenApplicationsPage";
 import StudentOpeningsPage from "./pages/studentOpenings/studentOpeningsPage";
 import IssuesPage from "./pages/issues/issuesPage";
@@ -55,6 +57,7 @@ export default function App() {
             <Route path="/student/profile" element={<ProfilePage />} />
             <Route path="/student/openings" element={<StudentOpeningsPage />} />
             <Route path="/student/applied-jobs" element={<StudentAppliedJobsPage />} />
+            <Route path="/student/interviews" element={<StudentInterviewsPage />} />
             <Route path="/student/open-applications" element={<StudentOpenApplicationsPage />} />
             <Route path="/student/issues" element={<IssuesPage />} />
           </Route>
@@ -67,6 +70,7 @@ export default function App() {
             <Route path="/operations/job-openings" element={<JobOpeningManagementPage />} />
             <Route path="/operations/applied-students" element={<AppliedStudentsPage />} />
             <Route path="/operations/open-link-applications" element={<AppliedStudentsPage openLinkOnly />} />
+            <Route path="/operations/interviews" element={<InterviewsPage />} />
             <Route path="/operations/issues" element={<IssuesPage />} />
           </Route>
         </Route>

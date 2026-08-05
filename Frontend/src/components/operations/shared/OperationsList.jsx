@@ -12,10 +12,12 @@ import StatusBadge from "../../custom/statusBadge";
 import PageLoader from "../../loader/PageLoader";
 import ConfirmModal from "../../modal/confirmModal";
 import DetailModal from "../../modal/detailModal";
+import ExportColumnsModal from "./exportColumnsModal";
 
 const actionTone = (label) => {
   const normalized = label.toLowerCase();
   if (normalized.includes("delete") || normalized.includes("reject") || normalized.includes("disable") || normalized.includes("close")) return "listing-action-red";
+  if (normalized.includes("schedule") || normalized.includes("interview")) return "listing-action-cyan";
   if (normalized.includes("resume") || normalized.includes("export") || normalized.includes("appl")) return "listing-action-amber";
   if (normalized.includes("select") || normalized.includes("activate") || normalized.includes("enable") || normalized.includes("reopen")) return "listing-action-sky";
   if (normalized.includes("short") || normalized.includes("view")) return "listing-action-blue";
@@ -27,61 +29,6 @@ const getPrimaryText = (row, columns) => row.role || row.name || row.student || 
 const getSecondaryText = (row) => [row.company, row.college, row.location, row.industry].filter(Boolean).slice(0, 2).join(" • ");
 const isMetricValue = (value) => typeof value === "number" || (/^\d+(\.\d+)?$/.test(String(value)) && String(value).length <= 6);
 
-function ExportColumnsModal({ open, title, columns = [], selectedFields = [], onChange, onClose, onExport, loading }) {
-  if (!open) return null;
-  const selectedSet = new Set(selectedFields);
-  const allSelected = columns.length > 0 && selectedFields.length === columns.length;
-  const toggleField = (key) => {
-    onChange(selectedSet.has(key) ? selectedFields.filter((field) => field !== key) : [...selectedFields, key]);
-  };
-
-  return (
-    <div className="modal-backdrop">
-      <div className="modal-shell flex max-h-[88vh] max-w-4xl flex-col">
-        <div className="modal-header">
-          <div>
-            <span className="modal-eyebrow">Export Excel</span>
-            <h2 className="modal-title">{title}</h2>
-            <p className="modal-subtitle">Choose the student profile columns to include.</p>
-          </div>
-          <button className="modal-close" onClick={onClose} aria-label="Close">X</button>
-        </div>
-        <div className="modal-body overflow-auto">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm font-semibold text-portal-muted">{selectedFields.length} of {columns.length} columns selected</p>
-            <div className="flex gap-2">
-              <button className="secondary-btn px-3 py-1.5" type="button" onClick={() => onChange(columns.map((column) => column.key))}>
-                Select all
-              </button>
-              <button className="secondary-btn px-3 py-1.5" type="button" onClick={() => onChange([])}>
-                Clear
-              </button>
-            </div>
-          </div>
-          <label className="mb-3 flex items-center gap-2 rounded-lg border border-portal-border bg-slate-50 px-3 py-2 text-sm font-bold text-portal-ink">
-            <input type="checkbox" checked={allSelected} onChange={(event) => onChange(event.target.checked ? columns.map((column) => column.key) : [])} />
-            All student profile columns
-          </label>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {columns.map((column) => (
-              <label key={column.key} className="flex min-w-0 items-center gap-2 rounded-lg border border-portal-border bg-white px-3 py-2 text-sm font-semibold text-portal-ink">
-                <input type="checkbox" checked={selectedSet.has(column.key)} onChange={() => toggleField(column.key)} />
-                <span className="truncate">{column.label}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-        <div className="flex flex-wrap justify-end gap-2 border-t border-portal-border bg-slate-50 px-5 py-4">
-          <CustomButton variant="secondary" type="button" onClick={onClose}>Cancel</CustomButton>
-          <CustomButton type="button" onClick={onExport} loading={loading} disabled={!selectedFields.length}>
-            Export
-          </CustomButton>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function OperationsList({
   title,
   searchPlaceholder,
@@ -92,6 +39,8 @@ export default function OperationsList({
   filterConfig = [],
   rowDetail,
   detailContent,
+  primaryText,
+  primaryMeta,
   primaryAction,
   exportAction,
   exportColumns = [],
@@ -219,7 +168,8 @@ export default function OperationsList({
           {visible.length ? (
             <div className="grid gap-2">
               {visible.map((row) => {
-                const primary = getPrimaryText(row, columns);
+                const primary = primaryText ? primaryText(row) : getPrimaryText(row, columns);
+                const inlineMeta = primaryMeta ? primaryMeta(row) : "";
                 const secondary = getSecondaryText(row);
                 const details = columns.filter((column) => column.key !== "status" && column.key !== "logo" && !hiddenListKeys.includes(column.key)).slice(0, 6);
                 const metrics = columns.filter((column) => column.key !== "status" && isMetricValue(row[column.key])).slice(0, 5);
@@ -231,6 +181,7 @@ export default function OperationsList({
                         <div className="flex min-w-0 flex-wrap items-center gap-2">
                           <span className="listing-icon"><UserRound className="h-4 w-4" /></span>
                           <h2 className="max-w-md truncate text-base font-extrabold text-portal-ink">{primary}</h2>
+                          {inlineMeta ? <span className="max-w-xs truncate text-xs font-semibold text-portal-muted">{inlineMeta}</span> : null}
                           {showIdChip && row.id ? <span className="listing-chip">Id: <span className="font-black italic">{row.id}</span></span> : null}
                           {row.status ? <StatusBadge status={row.status} /> : null}
                         </div>
