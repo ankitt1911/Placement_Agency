@@ -156,7 +156,7 @@ const fetchApplyViaOpenLink = async (req, res) => {
     let user = await User.findOne({ email });
     if (!user) {
       const randomPassword = await bcrypt.hash(`${email}-${Date.now()}-${Math.random()}`, 10);
-      user = await User.create({ email, name, password: randomPassword, role: "student" });
+      user = await User.create({ email, name, password: randomPassword, role: "student", accountSource: "open-link", isClaimed: false });
     }
     if (user.role !== "student") return res.status(422).json({ success: false, message: "This email cannot be used for student application", statusCode: 422 });
 

@@ -36,7 +36,9 @@ export default function RegisterPage() {
         ErrorMessage("Registration failed");
         return;
       }
-      SuccessMessage("Registration successful. Please login.");
+      SuccessMessage(response.syncedApplications
+        ? `Registration successful. We synced ${response.syncedApplications} application(s) you submitted earlier. Please login.`
+        : "Registration successful. Please login.");
       navigate("/login", { replace: true });
     } finally {
       setLoading(false);

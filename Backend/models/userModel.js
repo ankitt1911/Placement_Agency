@@ -8,6 +8,8 @@ const userSchema = new mongoose.Schema({
   lastLogin: { type: Date },
   profile: { type: mongoose.Schema.Types.ObjectId, ref: "StudentProfile" },
   name: { type: String, trim: true },
+  accountSource: { type: String, enum: ["self", "open-link"], default: "self" },
+  isClaimed: { type: Boolean, default: true },
 }, { timestamps: true });
 
 userSchema.index({ email: 1, role: 1 });

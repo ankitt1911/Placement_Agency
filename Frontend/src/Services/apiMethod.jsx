@@ -21,7 +21,7 @@ export const ApplyToOpeningApi = (jobId) => apiRequest(apiConstant.applyToOpenin
 export const GetOpenLinkOpeningApi = (id) => apiRequest(apiConstant.getOpenLinkOpening(id), "Get");
 export const ApplyViaOpenLinkApi = (id, params) => apiRequest(apiConstant.applyViaOpenLink(id), "Post", params, true);
 export const GetStudentApplicationsApi = (params) => apiRequest(apiConstant.getStudentApplications, "Get", params);
-export const GetStudentApplicationFilterOptionsApi = () => apiRequest(apiConstant.getStudentApplicationFilterOptions, "Get");
+export const GetStudentApplicationFilterOptionsApi = (params) => apiRequest(apiConstant.getStudentApplicationFilterOptions, "Get", params);
 export const GetApplicationDetailsApi = (id) => apiRequest(apiConstant.getApplicationDetails(id), "Get");
 export const WithdrawApplicationApi = (id) => apiRequest(apiConstant.withdrawApplication(id), "Post", {}, true);
 
