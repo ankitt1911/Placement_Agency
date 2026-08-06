@@ -7,6 +7,7 @@ import AppHeader from "./components/layouts/AppHeader";
 import AppSidedrawer from "./components/layouts/AppSidedrawer";
 import AppSidenav from "./components/layouts/AppSidenav";
 import ConfirmModal from "./components/modal/confirmModal";
+import ChangePasswordModal from "./components/modal/auth/changePasswordModal";
 import { handleGetProfile } from "./Services/apiCalling/profileApis";
 import { isStudentProfileComplete } from "./Utlis/Common/profileCompletion";
 
@@ -15,6 +16,7 @@ export default function AppLayout() {
   const [profileComplete, setProfileComplete] = useState(null);
   const [checkingProfile, setCheckingProfile] = useState(false);
   const [completionModalOpen, setCompletionModalOpen] = useState(false);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const { user, role } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -62,13 +64,14 @@ export default function AppLayout() {
         <AppSidenav role={role} profileComplete={profileComplete} onBlockedNavigation={showCompletionModal} />
         <AppSidedrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} role={role} profileComplete={profileComplete} onBlockedNavigation={showCompletionModal} />
         <div className="flex min-w-0 flex-1 flex-col lg:pl-72">
-          <AppHeader user={user} onMenu={() => setDrawerOpen(true)} onLogout={handleLogout} />
+          <AppHeader user={user} onMenu={() => setDrawerOpen(true)} onLogout={handleLogout} onChangePassword={() => setPasswordModalOpen(true)} />
           <main className="min-h-0 flex-1 overflow-y-auto">
             <Outlet />
           </main>
           <AppFooter />
         </div>
       </div>
+      <ChangePasswordModal open={passwordModalOpen} onClose={() => setPasswordModalOpen(false)} />
       <ConfirmModal
         open={completionModalOpen}
         title="Complete your profile"

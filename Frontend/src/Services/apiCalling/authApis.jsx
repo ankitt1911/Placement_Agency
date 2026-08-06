@@ -1,4 +1,4 @@
-import { LoginApi, LogoutApi, RegisterApi } from "../apiMethod";
+import { ChangePasswordApi, LoginApi, LogoutApi, RegisterApi } from "../apiMethod";
 
 const handleLogin = async (params) => {
   try {
@@ -27,4 +27,18 @@ const handleRegister = async (params) => {
   }
 };
 
-export { handleLogin, handleLogout, handleGetCurrentUser, handleRegister };
+// The api interceptor already toasts the server message on failure, so only the outcome is reported back.
+const handleChangePassword = async (params) => {
+  try {
+    const response = await ChangePasswordApi({
+      currentPassword: params.currentPassword,
+      newPassword: params.newPassword,
+      confirmPassword: params.confirmPassword
+    });
+    return { success: true, message: response?.message || "Password updated successfully" };
+  } catch (error) {
+    return { success: false, message: error?.message || "Unable to update password" };
+  }
+};
+
+export { handleLogin, handleLogout, handleGetCurrentUser, handleRegister, handleChangePassword };

@@ -2,6 +2,7 @@ export const apiConstant = {
   health: "/health",
   register: "/auth/register",
   logIn: "/auth/login",
+  changePassword: "/auth/change-password",
   refreshToken: "/auth/refresh-token",
   signOut: "/auth/logout",
   getProfile: "/profile/me",

@@ -4,6 +4,7 @@ import apiRequest from "./apiService";
 export const HealthApi = () => apiRequest(apiConstant.health, "Get");
 export const RegisterApi = (params) => apiRequest(apiConstant.register, "Post", params, true);
 export const LoginApi = (params) => apiRequest(apiConstant.logIn, "Post", params, true);
+export const ChangePasswordApi = (params) => apiRequest(apiConstant.changePassword, "Patch", params, true);
 export const RefreshTokenApi = () => apiRequest(apiConstant.refreshToken, "Post", {}, true);
 export const LogoutApi = () => apiRequest(apiConstant.signOut, "Post", {}, true);
 
