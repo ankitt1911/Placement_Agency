@@ -78,6 +78,29 @@ const fetchLogin = async (req, res) => {
   }
 };
 
+const fetchChangePassword = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.mongoId).select("+password");
+    if (!user) return res.status(404).json({ success: false, message: "User not found", statusCode: 404 });
+    // Open link accounts have a placeholder password they never set, so they must register to claim it first.
+    if (user.isClaimed === false) return res.status(403).json({ success: false, message: "Please activate your account by registering with this email before changing the password", statusCode: 403 });
+
+    const isMatch = await bcrypt.compare(req.body.currentPassword, user.password);
+    // 422 and not 401: the frontend interceptor treats 401 as an expired session and logs the user out.
+    if (!isMatch) return res.status(422).json({ success: false, message: "Current password is incorrect", statusCode: 422 });
+
+    const isSame = await bcrypt.compare(req.body.newPassword, user.password);
+    if (isSame) return res.status(422).json({ success: false, message: "New password must be different from the current password", statusCode: 422 });
+
+    user.password = await bcrypt.hash(req.body.newPassword, 10);
+    await user.save();
+
+    return res.status(200).json({ success: true, message: "Password updated successfully", statusCode: 200 });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message, statusCode: 500 });
+  }
+};
+
 const fetchRefreshToken = async (req, res) => {
   return res.status(501).json({ success: false, message: "Refresh token storage is not implemented yet", statusCode: 501 });
 };
@@ -86,4 +109,4 @@ const fetchLogout = async (req, res) => {
   return res.status(200).json({ success: true, message: "Logged out successfully", statusCode: 200 });
 };
 
-module.exports = { fetchRegister, fetchLogin, fetchRefreshToken, fetchLogout };
+module.exports = { fetchRegister, fetchLogin, fetchChangePassword, fetchRefreshToken, fetchLogout };
