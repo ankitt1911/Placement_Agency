@@ -1,5 +1,5 @@
-import { BulkChangeApplicantStatusApi, ChangeApplicantStatusApi, DownloadApplicantResumeApi, ExportApplicantsExcelApi, GetApplicantFilterOptionsApi, GetApplicantsApi } from "../apiMethod";
-import { asList, mapApplication, unwrapBlob, unwrapData, unwrapFilterOptions } from "./apiAdapters";
+import { BulkChangeApplicantStatusApi, ChangeApplicantStatusApi, DownloadApplicantResumeApi, ExportApplicantsExcelApi, GenerateApplicantResumeApi, GetApplicantFilterOptionsApi, GetApplicantsApi } from "../apiMethod";
+import { asList, asPdfBlob, mapApplication, unwrapBlob, unwrapData, unwrapFilterOptions } from "./apiAdapters";
 
 const handleGetApplicants = async (params = {}) => asList(await GetApplicantsApi(params)).map(mapApplication);
 const handleGetApplicantFilterOptions = async (params = {}) => unwrapFilterOptions(await GetApplicantFilterOptionsApi(params));
@@ -13,5 +13,8 @@ const handleBulkChangeApplicantStatus = async (applications, status, note = "") 
 };
 const handleDownloadApplicantResume = async (applicant) => unwrapBlob(await DownloadApplicantResumeApi(applicant.id));
 const handleExportApplicantsExcel = async (params = {}) => unwrapBlob(await ExportApplicantsExcelApi(params));
+// Built from the applicant's live profile rather than the file they attached,
+// so both the applied-students and open-link tabs show one consistent resume.
+const handleGenerateApplicantResume = async (id) => asPdfBlob(unwrapBlob(await GenerateApplicantResumeApi(id)));
 
-export { handleGetApplicants, handleGetApplicantFilterOptions, handleChangeApplicantStatus, handleBulkChangeApplicantStatus, handleDownloadApplicantResume, handleExportApplicantsExcel };
+export { handleGetApplicants, handleGetApplicantFilterOptions, handleChangeApplicantStatus, handleBulkChangeApplicantStatus, handleDownloadApplicantResume, handleGenerateApplicantResume, handleExportApplicantsExcel };

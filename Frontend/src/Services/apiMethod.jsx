@@ -45,6 +45,7 @@ export const EditStudentApi = (id, params) => apiRequest(apiConstant.editStudent
 export const DisableStudentApi = (id) => apiRequest(apiConstant.disableStudent(id), "Patch", {}, true);
 export const DeleteStudentApi = (id) => apiRequest(apiConstant.deleteStudent(id), "Delete", {}, true);
 export const DownloadResumeApi = (id) => apiRequest(apiConstant.downloadResume(id), "Get", {}, false, {}, "blob");
+export const GenerateStudentResumeApi = (id) => apiRequest(apiConstant.generateStudentResume(id), "Get", {}, false, {}, "blob");
 export const ExportStudentsExcelApi = (params) => apiRequest(apiConstant.exportStudentsExcel, "Get", params, false, {}, "blob");
 
 export const GetOperationsOpeningsApi = (params) => apiRequest(apiConstant.getOperationsOpenings, "Get", params);
@@ -67,6 +68,7 @@ export const GetApplicantDetailsApi = (id) => apiRequest(apiConstant.getApplican
 export const ChangeApplicantStatusApi = (id, params) => apiRequest(apiConstant.changeApplicantStatus(id), "Patch", params, true);
 export const BulkChangeApplicantStatusApi = (params) => apiRequest(apiConstant.bulkChangeApplicantStatus, "Patch", params, true);
 export const DownloadApplicantResumeApi = (id) => apiRequest(apiConstant.downloadApplicantResume(id), "Get", {}, false, {}, "blob");
+export const GenerateApplicantResumeApi = (id) => apiRequest(apiConstant.generateApplicantResume(id), "Get", {}, false, {}, "blob");
 export const ExportApplicantsExcelApi = (params) => apiRequest(apiConstant.exportApplicantsExcel, "Get", params, false, {}, "blob");
 
 export const GetMyInterviewsApi = (params) => apiRequest(apiConstant.getMyInterviews, "Get", params);

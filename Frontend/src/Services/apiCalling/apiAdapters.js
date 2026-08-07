@@ -5,6 +5,9 @@ export const asList = (response) => {
   return Array.isArray(data) ? data : [];
 };
 export const unwrapFilterOptions = (response) => unwrapData(response, {});
+// Object URLs only render inline in the preview frame when the blob carries the
+// pdf type, which is lost whenever the response is re-wrapped along the way.
+export const asPdfBlob = (blob) => blob instanceof Blob && blob.type === "application/pdf" ? blob : new Blob([blob], { type: "application/pdf" });
 
 const join = (value) => Array.isArray(value) ? value.join(", ") : value || "";
 const money = (salary) => {

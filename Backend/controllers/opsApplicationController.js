@@ -6,6 +6,7 @@ const getApplicationFilterOptions = async (req, res) => opsApplicationService.fe
 const getApplicationDetail = async (req, res) => opsApplicationService.fetchGetApplicationDetail(req, res);
 const exportApplications = async (req, res) => opsApplicationService.fetchExportApplications(req, res);
 const downloadApplicationResume = async (req, res) => opsApplicationService.fetchDownloadApplicationResume(req, res);
+const generateApplicationResume = async (req, res) => opsApplicationService.fetchGenerateApplicationResume(req, res);
 
 const updateApplicationStatus = async (req, res) => {
   const { error } = updateApplicationStatusSchema.validate(req.body);
@@ -20,4 +21,4 @@ const bulkUpdateApplicationStatus = async (req, res) => {
   return opsApplicationService.fetchBulkUpdateApplicationStatus(req, res);
 };
 
-module.exports = { getApplications, getApplicationFilterOptions, getApplicationDetail, updateApplicationStatus, bulkUpdateApplicationStatus, exportApplications, downloadApplicationResume };
+module.exports = { getApplications, getApplicationFilterOptions, getApplicationDetail, updateApplicationStatus, bulkUpdateApplicationStatus, exportApplications, downloadApplicationResume, generateApplicationResume };

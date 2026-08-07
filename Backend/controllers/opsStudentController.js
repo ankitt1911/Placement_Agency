@@ -7,6 +7,7 @@ const getStudentDetail = async (req, res) => opsStudentService.fetchGetStudentDe
 const disableStudent = async (req, res) => opsStudentService.fetchDisableStudent(req, res);
 const deleteStudent = async (req, res) => opsStudentService.fetchDeleteStudent(req, res);
 const downloadStudentResume = async (req, res) => opsStudentService.fetchDownloadStudentResume(req, res);
+const generateStudentResume = async (req, res) => opsStudentService.fetchGenerateStudentResume(req, res);
 const exportStudents = async (req, res) => opsStudentService.fetchExportStudents(req, res);
 
 const updateStudent = async (req, res) => {
@@ -15,4 +16,4 @@ const updateStudent = async (req, res) => {
   return opsStudentService.fetchUpdateStudent(req, res);
 };
 
-module.exports = { getStudents, getStudentFilterOptions, getStudentDetail, updateStudent, disableStudent, deleteStudent, downloadStudentResume, exportStudents };
+module.exports = { getStudents, getStudentFilterOptions, getStudentDetail, updateStudent, disableStudent, deleteStudent, downloadStudentResume, generateStudentResume, exportStudents };

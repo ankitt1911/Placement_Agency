@@ -2,6 +2,7 @@ const path = require("path");
 const User = require("../models/userModel");
 const StudentProfile = require("../models/studentProfileModel");
 const { exportExcel } = require("../utils/exportExcel");
+const { generateResumePdf } = require("../utils/resumePdf");
 const { parseSearchTerms, regexForTerm } = require("../utils/searchUtils");
 
 const requireOps = (req, res) => req.user.role === "operations" || (res.status(403).json({ success: false, message: "Access denied", statusCode: 403 }), false);
@@ -183,6 +184,18 @@ const fetchDownloadStudentResume = async (req, res) => {
   return res.download(path.join(__dirname, "..", profile.resume.replace(/^\//, "")));
 };
 
+// Builds a resume from the stored profile instead of serving whatever file the
+// student uploaded, so ops always gets a complete, consistently formatted CV.
+const fetchGenerateStudentResume = async (req, res) => {
+  if (!requireOps(req, res)) return;
+  const profile = await StudentProfile.findById(req.params.id).populate("user", "name email").lean();
+  if (!profile) return res.status(404).json({ success: false, message: "Student not found", statusCode: 404 });
+  const { buffer, fileName } = await generateResumePdf(profile, profile.user || {});
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `inline; filename="${fileName}"`);
+  return res.send(buffer);
+};
+
 const fetchExportStudents = async (req, res) => {
   if (!requireOps(req, res)) return;
   const query = await buildProfileQuery(req.query);
@@ -199,4 +212,4 @@ const fetchExportStudents = async (req, res) => {
   return res.send(buffer);
 };
 
-module.exports = { fetchGetStudents, fetchGetStudentFilterOptions, fetchGetStudentDetail, fetchUpdateStudent, fetchDisableStudent, fetchDeleteStudent, fetchDownloadStudentResume, fetchExportStudents };
+module.exports = { fetchGetStudents, fetchGetStudentFilterOptions, fetchGetStudentDetail, fetchUpdateStudent, fetchDisableStudent, fetchDeleteStudent, fetchDownloadStudentResume, fetchGenerateStudentResume, fetchExportStudents };
