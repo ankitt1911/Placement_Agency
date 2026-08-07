@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { handleBulkChangeApplicantStatus, handleChangeApplicantStatus, handleDownloadApplicantResume, handleExportApplicantsExcel, handleGetApplicantFilterOptions, handleGetApplicants } from "../../../Services/apiCalling/appliedStudentsApis";
-import { downloadBlob } from "../../../Utlis/Common/commonMethod";
-import { ErrorMessage } from "../../../Utlis/Toastify/ToastMessage";
+import { handleBulkChangeApplicantStatus, handleChangeApplicantStatus, handleExportApplicantsExcel, handleGenerateApplicantResume, handleGetApplicantFilterOptions, handleGetApplicants } from "../../../Services/apiCalling/appliedStudentsApis";
+import { resumeFileName } from "../../../Utlis/Common/commonMethod";
+import { ErrorMessage, SuccessMessage } from "../../../Utlis/Toastify/ToastMessage";
+import ResumePreviewModal from "../../modal/resumePreviewModal";
 import ScheduleInterviewModal from "../interviews/scheduleInterviewModal";
 import OperationsList from "../shared/OperationsList";
 import AppliedStudentDetails from "./appliedStudentDetails";
@@ -106,6 +107,9 @@ export default function AppliedStudents({ openLinkOnly = false }) {
   // per-row action, the checked rows for the bulk action.
   const [scheduling, setScheduling] = useState(null);
   const [afterSchedule, setAfterSchedule] = useState(null);
+  // The resume is generated from the applicant's profile on demand, so the row
+  // only has to say who to build it for; the modal owns fetching and previewing.
+  const [resumeTarget, setResumeTarget] = useState(null);
   const statusAction = (label, status) => ({
     label,
     message: (row) => `${label} ${row.student}?`,
@@ -131,7 +135,16 @@ export default function AppliedStudents({ openLinkOnly = false }) {
           statusAction("Shortlist", "Shortlisted"),
           statusAction("Select", "Selected"),
           { label: "Schedule Interview", onClick: (row, setItems, loadItems) => { setScheduling([row]); setAfterSchedule(() => () => loadItems()); }, disabled: (row) => !isActionable(row) },
-          { label: "Resume", message: (row) => `Download resume for ${row.student}?`, run: async (row) => downloadBlob(await handleDownloadApplicantResume(row), row.resume), update: (rows) => rows, success: "Resume downloaded" }
+          {
+            label: "Resume",
+            onClick: (row) => setResumeTarget({
+              key: row.id,
+              title: row.student || "Applicant",
+              subtitle: [row.role, row.company].filter(Boolean).join(" • ") || "Review the generated resume before downloading.",
+              fileName: resumeFileName(row.student),
+              load: () => handleGenerateApplicantResume(row.id)
+            })
+          }
         ]}
         selectable
         selectableWhen={isActionable}
@@ -158,6 +171,11 @@ export default function AppliedStudents({ openLinkOnly = false }) {
         applications={scheduling || []}
         onClose={() => { setScheduling(null); setAfterSchedule(null); }}
         onSaved={() => afterSchedule?.()}
+      />
+      <ResumePreviewModal
+        target={resumeTarget}
+        onClose={() => setResumeTarget(null)}
+        onDownloaded={() => SuccessMessage("Resume downloaded")}
       />
     </>
   );

@@ -3,6 +3,7 @@ const Application = require("../models/applicationModel");
 const JobOpening = require("../models/jobOpeningModel");
 const StudentProfile = require("../models/studentProfileModel");
 const { exportExcel } = require("../utils/exportExcel");
+const { generateResumePdf } = require("../utils/resumePdf");
 const { parseSearchTerms } = require("../utils/searchUtils");
 
 const requireOps = (req, res) => req.user.role === "operations" || (res.status(403).json({ success: false, message: "Access denied", statusCode: 403 }), false);
@@ -273,4 +274,19 @@ const fetchDownloadApplicationResume = async (req, res) => {
   return res.download(path.join(__dirname, "..", application.resumeUsed.replace(/^\//, "")));
 };
 
-module.exports = { fetchGetApplications, fetchGetApplicationFilterOptions, fetchGetApplicationDetail, fetchUpdateApplicationStatus, fetchBulkUpdateApplicationStatus, fetchExportApplications, fetchDownloadApplicationResume };
+// The applicant's resume is rebuilt from their live profile, so the same
+// generated CV backs both the applied-students and open-link listings.
+const fetchGenerateApplicationResume = async (req, res) => {
+  if (!requireOps(req, res)) return;
+  const application = await Application.findById(req.params.id).populate("student", "name email").lean();
+  if (!application) return res.status(404).json({ success: false, message: "Application not found", statusCode: 404 });
+  const user = application.student || {};
+  const profile = (await StudentProfile.findOne({ user: user._id }).lean()) || {};
+  if (!profile._id && !user.name && !user.email) return res.status(404).json({ success: false, message: "Student profile not found", statusCode: 404 });
+  const { buffer, fileName } = await generateResumePdf(profile, user);
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", `inline; filename="${fileName}"`);
+  return res.send(buffer);
+};
+
+module.exports = { fetchGetApplications, fetchGetApplicationFilterOptions, fetchGetApplicationDetail, fetchUpdateApplicationStatus, fetchBulkUpdateApplicationStatus, fetchExportApplications, fetchDownloadApplicationResume, fetchGenerateApplicationResume };

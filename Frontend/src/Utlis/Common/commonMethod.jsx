@@ -9,6 +9,10 @@ export const buildSelectOptions = (list = [], labelKey, valueKey) => {
   }));
 };
 
+// Mirrors the name the resume service stamps on the file so a preview saved
+// from the browser matches a direct download.
+export const resumeFileName = (name) => `${String(name || "candidate").replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "").toLowerCase() || "candidate"}-resume.pdf`;
+
 export const downloadBlob = (blobData, fileName) => {
   const blob = blobData instanceof Blob ? blobData : new Blob([blobData]);
   const url = URL.createObjectURL(blob);
