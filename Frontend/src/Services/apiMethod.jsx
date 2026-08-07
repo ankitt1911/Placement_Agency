@@ -65,6 +65,7 @@ export const GetApplicantsApi = (params) => apiRequest(apiConstant.getApplicants
 export const GetApplicantFilterOptionsApi = (params) => apiRequest(apiConstant.getApplicantFilterOptions, "Get", params);
 export const GetApplicantDetailsApi = (id) => apiRequest(apiConstant.getApplicantDetails(id), "Get");
 export const ChangeApplicantStatusApi = (id, params) => apiRequest(apiConstant.changeApplicantStatus(id), "Patch", params, true);
+export const BulkChangeApplicantStatusApi = (params) => apiRequest(apiConstant.bulkChangeApplicantStatus, "Patch", params, true);
 export const DownloadApplicantResumeApi = (id) => apiRequest(apiConstant.downloadApplicantResume(id), "Get", {}, false, {}, "blob");
 export const ExportApplicantsExcelApi = (params) => apiRequest(apiConstant.exportApplicantsExcel, "Get", params, false, {}, "blob");
 
@@ -73,6 +74,7 @@ export const GetInterviewsApi = (params) => apiRequest(apiConstant.getInterviews
 export const GetInterviewFilterOptionsApi = (params) => apiRequest(apiConstant.getInterviewFilterOptions, "Get", params);
 export const ExportInterviewsExcelApi = (params) => apiRequest(apiConstant.exportInterviewsExcel, "Get", params, false, {}, "blob");
 export const ScheduleInterviewApi = (params) => apiRequest(apiConstant.scheduleInterview, "Post", params, true);
+export const BulkScheduleInterviewsApi = (params) => apiRequest(apiConstant.bulkScheduleInterviews, "Post", params, true);
 export const GetInterviewDetailsApi = (id) => apiRequest(apiConstant.getInterviewDetails(id), "Get");
 export const UpdateInterviewApi = (id, params) => apiRequest(apiConstant.updateInterview(id), "Put", params, true);
 export const UpdateInterviewStatusApi = (id, params) => apiRequest(apiConstant.updateInterviewStatus(id), "Patch", params, true);

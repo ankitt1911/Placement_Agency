@@ -1,4 +1,4 @@
-const { updateApplicationStatusSchema } = require("../validators/applicationValidators");
+const { updateApplicationStatusSchema, bulkUpdateApplicationStatusSchema } = require("../validators/applicationValidators");
 const opsApplicationService = require("../services/opsApplicationService");
 
 const getApplications = async (req, res) => opsApplicationService.fetchGetApplications(req, res);
@@ -13,4 +13,11 @@ const updateApplicationStatus = async (req, res) => {
   return opsApplicationService.fetchUpdateApplicationStatus(req, res);
 };
 
-module.exports = { getApplications, getApplicationFilterOptions, getApplicationDetail, updateApplicationStatus, exportApplications, downloadApplicationResume };
+const bulkUpdateApplicationStatus = async (req, res) => {
+  const { error, value } = bulkUpdateApplicationStatusSchema.validate(req.body);
+  if (error) return res.status(422).json({ success: false, message: error.details[0].message, statusCode: 422 });
+  req.body = value;
+  return opsApplicationService.fetchBulkUpdateApplicationStatus(req, res);
+};
+
+module.exports = { getApplications, getApplicationFilterOptions, getApplicationDetail, updateApplicationStatus, bulkUpdateApplicationStatus, exportApplications, downloadApplicationResume };

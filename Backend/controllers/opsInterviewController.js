@@ -1,4 +1,4 @@
-const { createInterviewSchema, updateInterviewSchema, updateInterviewStatusSchema } = require("../validators/interviewValidators");
+const { createInterviewSchema, bulkCreateInterviewSchema, updateInterviewSchema, updateInterviewStatusSchema } = require("../validators/interviewValidators");
 const opsInterviewService = require("../services/opsInterviewService");
 
 const validated = (schema, handler) => async (req, res) => {
@@ -15,7 +15,8 @@ const getInterviewDetail = async (req, res) => opsInterviewService.fetchGetInter
 const deleteInterview = async (req, res) => opsInterviewService.fetchDeleteInterview(req, res);
 
 const createInterview = validated(createInterviewSchema, opsInterviewService.fetchCreateInterview);
+const bulkCreateInterviews = validated(bulkCreateInterviewSchema, opsInterviewService.fetchBulkCreateInterviews);
 const updateInterview = validated(updateInterviewSchema, opsInterviewService.fetchUpdateInterview);
 const updateInterviewStatus = validated(updateInterviewStatusSchema, opsInterviewService.fetchUpdateInterviewStatus);
 
-module.exports = { getInterviews, getInterviewFilterOptions, exportInterviews, getInterviewDetail, createInterview, updateInterview, updateInterviewStatus, deleteInterview };
+module.exports = { getInterviews, getInterviewFilterOptions, exportInterviews, getInterviewDetail, createInterview, bulkCreateInterviews, updateInterview, updateInterviewStatus, deleteInterview };

@@ -185,6 +185,84 @@ const fetchCreateInterview = async (req, res) => {
   return respondWithInterview(res, interview._id, "Interview scheduled", 201);
 };
 
+// An application already sitting on an open interview is skipped rather than
+// duplicated, so a re-submitted bulk form cannot double book the same candidate.
+const openInterviewStatuses = ["Scheduled", "Rescheduled"];
+
+const buildInterviewDoc = (application, { note, ...details }, scheduledAt, userId) => ({
+  ...details,
+  application: application._id,
+  student: application.student,
+  job: application.job && application.job._id,
+  company: application.job && application.job.company,
+  scheduledAt,
+  scheduledBy: userId,
+  updatedBy: userId,
+  notes: note ? [{ text: note, updatedBy: userId, date: new Date() }] : [],
+});
+
+// Splits the requested ids into the ones that can be scheduled and the ones that
+// cannot, keeping the submitted order so staggered slots line up with the form.
+const partitionBulkApplications = (applicationIds, applications, alreadyScheduled) => {
+  const applicationById = new Map(applications.map((application) => [String(application._id), application]));
+  const eligible = [];
+  const skipped = [];
+
+  applicationIds.forEach((id) => {
+    const application = applicationById.get(String(id));
+    if (!application) skipped.push({ application: String(id), reason: "Application not found" });
+    else if (application.status === "Withdrawn") skipped.push({ application: String(id), reason: "Application withdrawn" });
+    else if (alreadyScheduled.has(String(id))) skipped.push({ application: String(id), reason: "Interview already scheduled" });
+    else eligible.push(application);
+  });
+
+  return { eligible, skipped };
+};
+
+const fetchBulkCreateInterviews = async (req, res) => {
+  try {
+    if (!requireOps(req, res)) return;
+    const { applications: applicationIds, slotMode, gapMinutes, scheduledAt, ...details } = req.body;
+
+    const [applications, openInterviews] = await Promise.all([
+      Application.find({ _id: { $in: applicationIds } }).populate("job", "company").lean(),
+      Interview.find({ application: { $in: applicationIds }, status: { $in: openInterviewStatuses } }).select("application").lean(),
+    ]);
+
+    const alreadyScheduled = new Set(openInterviews.map((interview) => String(interview.application)));
+    const { eligible, skipped } = partitionBulkApplications(applicationIds, applications, alreadyScheduled);
+    if (!eligible.length) return res.status(422).json({ success: false, message: "No eligible applications to schedule", created: 0, skipped, data: [], statusCode: 422 });
+
+    const start = new Date(scheduledAt).getTime();
+    const stepMs = ((details.durationMinutes || 60) + (gapMinutes || 0)) * 60000;
+    const docs = eligible.map((application, index) => buildInterviewDoc(
+      application,
+      details,
+      new Date(slotMode === "stagger" ? start + index * stepMs : start),
+      req.user.mongoId,
+    ));
+
+    let inserted = [];
+    try {
+      // Unordered so one rejected document does not abandon the rest of the batch.
+      inserted = await Interview.insertMany(docs, { ordered: false });
+    } catch (error) {
+      inserted = error.insertedDocs || [];
+      (error.writeErrors || []).forEach((writeError) => {
+        const failed = docs[writeError.index ?? (writeError.err && writeError.err.index)];
+        skipped.push({ application: String((failed && failed.application) || ""), reason: writeError.errmsg || (writeError.err && writeError.err.errmsg) || "Could not be scheduled" });
+      });
+      if (!inserted.length) return res.status(500).json({ success: false, message: error.message, created: 0, skipped, data: [], statusCode: 500 });
+    }
+
+    const interviews = await populateInterview(Interview.find({ _id: { $in: inserted.map((doc) => doc._id) } }).sort({ scheduledAt: 1 })).lean();
+    const data = await withStudentProfiles(interviews);
+    return res.status(201).json({ success: true, message: `${data.length} interview${data.length === 1 ? "" : "s"} scheduled`, created: data.length, skipped, data, statusCode: 201 });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message, statusCode: 500 });
+  }
+};
+
 const applyInterviewChanges = async (req, res, body) => {
   const { note, ...changes } = body;
   const update = { $set: { ...changes, updatedBy: req.user.mongoId } };
@@ -211,4 +289,4 @@ const fetchDeleteInterview = async (req, res) => {
   return res.status(200).json({ success: true, message: "Interview deleted", statusCode: 200 });
 };
 
-module.exports = { fetchGetInterviews, fetchGetInterviewFilterOptions, fetchExportInterviews, fetchGetInterviewDetail, fetchCreateInterview, fetchUpdateInterview, fetchUpdateInterviewStatus, fetchDeleteInterview };
+module.exports = { fetchGetInterviews, fetchGetInterviewFilterOptions, fetchExportInterviews, fetchGetInterviewDetail, fetchCreateInterview, fetchBulkCreateInterviews, fetchUpdateInterview, fetchUpdateInterviewStatus, fetchDeleteInterview };

@@ -51,7 +51,10 @@ export default function OperationsList({
   showIdChip = false,
   showProgressBar = false,
   hiddenListKeys = [],
-  initialSelectedId
+  initialSelectedId,
+  selectable = false,
+  selectableWhen,
+  bulkActions = []
 }) {
   const [items, setItems] = useState([]);
   const [filterOptions, setFilterOptions] = useState({});
@@ -66,6 +69,7 @@ export default function OperationsList({
   const [exporting, setExporting] = useState(false);
   const [handledInitialSelectedId, setHandledInitialSelectedId] = useState(null);
   const [selectedExportFields, setSelectedExportFields] = useState(() => exportColumns.map((column) => column.key));
+  const [checkedIds, setCheckedIds] = useState([]);
   const limit = 10;
 
   const requestParams = useMemo(() => {
@@ -78,11 +82,15 @@ export default function OperationsList({
     return params;
   }, [search, filters, filterConfig]);
 
+  // Every reload also drops the checked rows: a new search or filter can remove
+  // rows the user can no longer see, and acting on those silently is worse than
+  // asking them to pick again.
   const loadItems = async (params = requestParams) => {
     setLoading(true);
     try {
       const data = await fetchItems(params);
       setItems(data || []);
+      setCheckedIds([]);
     } finally {
       setLoading(false);
     }
@@ -105,6 +113,20 @@ export default function OperationsList({
     return items.filter((item) => terms.every((term) => searchKeys.some((key) => String(item[key] || "").toLowerCase().includes(term))));
   }, [items, search, searchKeys, fetchFilterOptions]);
 
+  // Selection spans the whole filtered result set, not just the visible page, so
+  // "select all" after a filter means every match and paging keeps the picks.
+  const selectableRows = useMemo(
+    () => (selectable ? filtered.filter((row) => !selectableWhen || selectableWhen(row)) : []),
+    [filtered, selectable, selectableWhen]
+  );
+  const checkedSet = useMemo(() => new Set(checkedIds), [checkedIds]);
+  const checkedRows = useMemo(() => selectableRows.filter((row) => checkedSet.has(row.id)), [selectableRows, checkedSet]);
+  const allChecked = selectableRows.length > 0 && checkedRows.length === selectableRows.length;
+
+  const toggleRow = (row) => setCheckedIds((current) => current.includes(row.id) ? current.filter((id) => id !== row.id) : [...current, row.id]);
+  const toggleAll = () => setCheckedIds(allChecked ? [] : selectableRows.map((row) => row.id));
+  const clearSelection = () => setCheckedIds([]);
+
   const runConfirm = async () => {
     setPending(true);
     try {
@@ -112,8 +134,11 @@ export default function OperationsList({
       if (confirm.update) {
         setItems((rows) => confirm.update(rows, confirm.row, result));
       }
-      SuccessMessage(confirm.success);
+      // Bulk actions report a count they only know once the call returns, so the
+      // success text may be a function of the result as well as the target rows.
+      SuccessMessage(resolveActionValue(confirm.success, result));
       setConfirm(null);
+      setCheckedIds([]);
     } finally {
       setPending(false);
     }
@@ -161,6 +186,37 @@ export default function OperationsList({
           <button className="secondary-btn shrink-0 self-end" onClick={() => { setFilters({}); setSearch(""); setPage(1); }}>Clear</button>
         </div>
       </div>
+      {selectable && !loading && selectableRows.length ? (
+        <div className="app-panel flex flex-wrap items-center gap-3 px-4 py-3">
+          <label className="flex cursor-pointer items-center gap-2 text-sm font-bold text-portal-ink">
+            <input type="checkbox" className="h-4 w-4 cursor-pointer accent-portal-pink" checked={allChecked} onChange={toggleAll} />
+            Select all ({selectableRows.length})
+          </label>
+          <span className="text-xs font-semibold text-portal-muted">{checkedRows.length} selected</span>
+          <div className="ml-auto flex flex-wrap gap-2">
+            {bulkActions.map((action) => (
+              <button
+                key={action.label}
+                className={`listing-action ${actionTone(action.label)}`}
+                disabled={!checkedRows.length || action.disabled?.(checkedRows)}
+                onClick={() => action.onClick
+                  ? action.onClick(checkedRows, { clearSelection, reload: loadItems })
+                  : setConfirm({
+                    row: checkedRows,
+                    action: action.run,
+                    update: action.update,
+                    success: (result) => resolveActionValue(action.success, result) || `${checkedRows.length} updated`,
+                    title: action.label,
+                    message: resolveActionValue(action.message, checkedRows)
+                  })}
+              >
+                {action.label}<ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            ))}
+            <button className="secondary-btn" disabled={!checkedRows.length} onClick={clearSelection}>Clear</button>
+          </div>
+        </div>
+      ) : null}
       {loading ? (
         <PageLoader />
       ) : (
@@ -179,6 +235,16 @@ export default function OperationsList({
                     <div className="relative grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto]">
                       <div className="min-w-0">
                         <div className="flex min-w-0 flex-wrap items-center gap-2">
+                          {selectable ? (
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 shrink-0 cursor-pointer accent-portal-pink disabled:cursor-not-allowed disabled:opacity-40"
+                              checked={checkedSet.has(row.id)}
+                              disabled={Boolean(selectableWhen) && !selectableWhen(row)}
+                              onChange={() => toggleRow(row)}
+                              aria-label={`Select ${primary}`}
+                            />
+                          ) : null}
                           <span className="listing-icon"><UserRound className="h-4 w-4" /></span>
                           <h2 className="max-w-md truncate text-base font-extrabold text-portal-ink">{primary}</h2>
                           {inlineMeta ? <span className="max-w-xs truncate text-xs font-semibold text-portal-muted">{inlineMeta}</span> : null}
