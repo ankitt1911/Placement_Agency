@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowRight, LockKeyhole, Mail, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck, Sparkles } from "lucide-react";
 import CustomButton from "../../components/custom/customButton";
 import { login } from "../../ReduxFeature/Authenthicate/LoginSlice";
 import { handleLogin } from "../../Services/apiCalling/authApis";
@@ -12,6 +12,7 @@ const loginHighlights = ["Student Portal", "Operations Dashboard", "Placement An
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -173,12 +174,22 @@ export default function LoginPage() {
                   <LockKeyhole size={19} className="shrink-0 text-black/38" />
                   <input
                     className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#0A0A0A] outline-none placeholder:text-black/35"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
                     placeholder="Enter password"
                     value={form.password}
                     onChange={(event) => setForm({ ...form, password: event.target.value })}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((previous) => !previous)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-pressed={showPassword}
+                    title={showPassword ? "Hide password" : "Show password"}
+                    className="grid shrink-0 place-items-center rounded-lg p-1 text-black/38 transition hover:text-[#F43F5E] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#F43F5E]/50"
+                  >
+                    {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+                  </button>
                 </span>
               </label>
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { handleChangeApplicantStatus, handleDownloadApplicantResume, handleExportApplicantsExcel, handleGetApplicantFilterOptions, handleGetApplicants } from "../../../Services/apiCalling/appliedStudentsApis";
+import { handleBulkChangeApplicantStatus, handleChangeApplicantStatus, handleDownloadApplicantResume, handleExportApplicantsExcel, handleGetApplicantFilterOptions, handleGetApplicants } from "../../../Services/apiCalling/appliedStudentsApis";
 import { downloadBlob } from "../../../Utlis/Common/commonMethod";
+import { ErrorMessage } from "../../../Utlis/Toastify/ToastMessage";
 import ScheduleInterviewModal from "../interviews/scheduleInterviewModal";
 import OperationsList from "../shared/OperationsList";
 import AppliedStudentDetails from "./appliedStudentDetails";
@@ -72,8 +73,39 @@ const appliedStudentExportColumns = [
   { key: "studentProfile.updatedAt", label: "Student Profile Updated At" },
 ];
 
+// Withdrawn is student-owned, so ops can neither restatus nor schedule those.
+const isActionable = (row) => row.status !== "Withdrawn";
+
+// The server can skip part of a batch (already at that status, withdrawn, gone),
+// so name the first few skips rather than silently reporting a smaller count.
+const reportSkipped = (rows, skipped) => {
+  if (!skipped.length) return;
+  const nameById = new Map(rows.map((row) => [String(row.id), row.student || "Applicant"]));
+  const detail = skipped.slice(0, 3).map((item) => `${nameById.get(String(item.application)) || "Applicant"} (${item.reason})`).join(", ");
+  ErrorMessage(`${skipped.length} skipped: ${detail}${skipped.length > 3 ? "…" : ""}`);
+};
+
+const bulkStatusAction = (label, status) => ({
+  label,
+  message: (rows) => `${label} ${rows.length} applicant${rows.length === 1 ? "" : "s"}?`,
+  run: async (rows) => {
+    const result = await handleBulkChangeApplicantStatus(rows.map((row) => row.id), status);
+    reportSkipped(rows, result.skipped);
+    return result;
+  },
+  update: (items, rows, result) => {
+    const updatedIds = new Set(result.data.map((item) => item.id));
+    return items.map((item) => updatedIds.has(item.id) ? { ...item, status } : item);
+  },
+  success: (result) => `${result.updated} applicant${result.updated === 1 ? "" : "s"} ${status.toLowerCase()}`,
+  disabled: (rows) => rows.every((row) => row.status === status)
+});
+
 export default function AppliedStudents({ openLinkOnly = false }) {
+  // `scheduling` holds the applications the modal is opened for: one row for the
+  // per-row action, the checked rows for the bulk action.
   const [scheduling, setScheduling] = useState(null);
+  const [afterSchedule, setAfterSchedule] = useState(null);
   const statusAction = (label, status) => ({
     label,
     message: (row) => `${label} ${row.student}?`,
@@ -98,8 +130,22 @@ export default function AppliedStudents({ openLinkOnly = false }) {
           statusAction("Reject", "Rejected"),
           statusAction("Shortlist", "Shortlisted"),
           statusAction("Select", "Selected"),
-          { label: "Schedule Interview", onClick: (row) => setScheduling(row), disabled: (row) => row.status === "Withdrawn" },
+          { label: "Schedule Interview", onClick: (row, setItems, loadItems) => { setScheduling([row]); setAfterSchedule(() => () => loadItems()); }, disabled: (row) => !isActionable(row) },
           { label: "Resume", message: (row) => `Download resume for ${row.student}?`, run: async (row) => downloadBlob(await handleDownloadApplicantResume(row), row.resume), update: (rows) => rows, success: "Resume downloaded" }
+        ]}
+        selectable
+        selectableWhen={isActionable}
+        bulkActions={[
+          bulkStatusAction("Reject", "Rejected"),
+          bulkStatusAction("Shortlist", "Shortlisted"),
+          bulkStatusAction("Select", "Selected"),
+          {
+            label: "Schedule Interview",
+            onClick: (rows, { clearSelection, reload }) => {
+              setScheduling(rows);
+              setAfterSchedule(() => () => { clearSelection(); reload(); });
+            }
+          }
         ]}
         exportAction={(params) => handleExportApplicantsExcel(openLinkOnly ? { ...params, appliedFromOpenLink: true } : params)}
         exportColumns={appliedStudentExportColumns}
@@ -108,9 +154,10 @@ export default function AppliedStudents({ openLinkOnly = false }) {
         rowDetail={(row) => row ? Object.entries(row).map(([key, value]) => <p key={key}><b>{key}:</b> {String(value)}</p>) : null}
       />
       <ScheduleInterviewModal
-        open={Boolean(scheduling)}
-        application={scheduling}
-        onClose={() => setScheduling(null)}
+        open={Boolean(scheduling && scheduling.length)}
+        applications={scheduling || []}
+        onClose={() => { setScheduling(null); setAfterSchedule(null); }}
+        onSaved={() => afterSchedule?.()}
       />
     </>
   );

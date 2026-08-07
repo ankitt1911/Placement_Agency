@@ -160,6 +160,49 @@ const fetchUpdateApplicationStatus = async (req, res) => {
   return res.status(200).json({ success: true, message: "Application status updated", data, statusCode: 200 });
 };
 
+// Withdrawn is student-owned, so ops cannot move those applications on, and an
+// application already sitting on the target status is left alone rather than
+// stamped with a fresh updatedBy for no change.
+const partitionBulkStatusUpdate = (applicationIds, applications, status) => {
+  const applicationById = new Map(applications.map((application) => [String(application._id), application]));
+  const eligible = [];
+  const skipped = [];
+
+  applicationIds.forEach((id) => {
+    const application = applicationById.get(String(id));
+    if (!application) skipped.push({ application: String(id), reason: "Application not found" });
+    else if (application.status === status) skipped.push({ application: String(id), reason: `Already ${status}` });
+    else if (application.status === "Withdrawn") skipped.push({ application: String(id), reason: "Application withdrawn" });
+    else eligible.push(String(id));
+  });
+
+  return { eligible, skipped };
+};
+
+const fetchBulkUpdateApplicationStatus = async (req, res) => {
+  try {
+    if (!requireOps(req, res)) return;
+    const { applications: applicationIds, status, note } = req.body;
+
+    const applications = await Application.find({ _id: { $in: applicationIds } }).select("status").lean();
+    const { eligible, skipped } = partitionBulkStatusUpdate(applicationIds, applications, status);
+    if (!eligible.length) return res.status(422).json({ success: false, message: "No applications to update", updated: 0, skipped, data: [], statusCode: 422 });
+
+    const update = { $set: { status, updatedBy: req.user.mongoId } };
+    if (note) update.$push = { notes: { text: note, updatedBy: req.user.mongoId, date: new Date() } };
+    await Application.updateMany({ _id: { $in: eligible } }, update);
+
+    const updated = await Application.find({ _id: { $in: eligible } })
+      .populate("student", "name email")
+      .populate({ path: "job", populate: { path: "company", select: "name locations" } })
+      .lean();
+    const data = await withStudentProfiles(updated);
+    return res.status(200).json({ success: true, message: `${data.length} application${data.length === 1 ? "" : "s"} updated`, updated: data.length, skipped, data, statusCode: 200 });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message, statusCode: 500 });
+  }
+};
+
 const fetchGetApplicationFilterOptions = async (req, res) => {
   try {
     if (!requireOps(req, res)) return;
@@ -230,4 +273,4 @@ const fetchDownloadApplicationResume = async (req, res) => {
   return res.download(path.join(__dirname, "..", application.resumeUsed.replace(/^\//, "")));
 };
 
-module.exports = { fetchGetApplications, fetchGetApplicationFilterOptions, fetchGetApplicationDetail, fetchUpdateApplicationStatus, fetchExportApplications, fetchDownloadApplicationResume };
+module.exports = { fetchGetApplications, fetchGetApplicationFilterOptions, fetchGetApplicationDetail, fetchUpdateApplicationStatus, fetchBulkUpdateApplicationStatus, fetchExportApplications, fetchDownloadApplicationResume };
