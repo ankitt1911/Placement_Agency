@@ -142,6 +142,7 @@ export default function AppliedStudents({ openLinkOnly = false }) {
               title: row.student || "Applicant",
               subtitle: [row.role, row.company].filter(Boolean).join(" • ") || "Review the generated resume before downloading.",
               fileName: resumeFileName(row.student),
+              uploadedResumeUrl: row.studentProfile?.resume || row.resume,
               load: () => handleGenerateApplicantResume(row.id)
             })
           }

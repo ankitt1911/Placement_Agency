@@ -32,6 +32,22 @@ function DetailTile({ label, value }) {
   );
 }
 
+function ProfilePhotoPanel({ url, name }) {
+  if (!url) return null;
+
+  return (
+    <div className="rounded-2xl border border-portal-border bg-white p-4 shadow-sm sm:col-span-2">
+      <p className="text-[10px] font-black uppercase tracking-wide text-portal-muted">Profile Photo</p>
+      <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-center">
+        <img className="h-32 w-32 rounded-2xl border border-portal-border object-cover shadow-sm" src={url} alt={`${name || "Student"} profile`} />
+        <a className="secondary-btn w-fit" href={url} target="_blank" rel="noreferrer">
+          <Link2 className="h-4 w-4" /> Open Photo
+        </a>
+      </div>
+    </div>
+  );
+}
+
 function Section({ icon: Icon, title, subtitle, tone, children }) {
   return (
     <section className="rounded-3xl border border-portal-border bg-white p-5 shadow-[0_12px_34px_rgba(15,23,42,0.08)]">
@@ -74,8 +90,12 @@ export default function StudentDetails({ student }) {
         </div>
         <div className="p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-3xl font-black text-white shadow-[0_16px_32px_rgba(37,99,235,0.25)]">
-              {(student.name || "S").slice(0, 1).toUpperCase()}
+            <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-blue-600 text-3xl font-black text-white shadow-[0_16px_32px_rgba(37,99,235,0.25)]">
+              {student.profilePhoto ? (
+                <img className="h-full w-full object-cover" src={student.profilePhoto} alt="" />
+              ) : (
+                (student.name || "S").slice(0, 1).toUpperCase()
+              )}
             </div>
             <div className="min-w-0">
               <p className="text-xs font-black uppercase tracking-wide text-blue-700">{student.college || "College not specified"}</p>
@@ -134,8 +154,8 @@ export default function StudentDetails({ student }) {
 
       <Section icon={FileText} title="Documents & Links" subtitle="Resume and social links shared by the student." tone="border-rose-100 bg-rose-50 text-rose-700">
         <div className="grid gap-4 sm:grid-cols-2">
+          <ProfilePhotoPanel url={student.profilePhoto} name={student.name} />
           <DetailTile label="Resume" value={student.resume} />
-          <DetailTile label="Profile Photo" value={student.profilePhoto} />
           <DetailTile label="Github" value={social.github ? <span className="inline-flex items-center gap-2"><Link2 className="h-4 w-4" />{social.github}</span> : ""} />
           <DetailTile label="LinkedIn" value={social.linkedin ? <span className="inline-flex items-center gap-2"><Link2 className="h-4 w-4" />{social.linkedin}</span> : ""} />
           <DetailTile label="Portfolio" value={social.portfolio ? <span className="inline-flex items-center gap-2"><Link2 className="h-4 w-4" />{social.portfolio}</span> : ""} />

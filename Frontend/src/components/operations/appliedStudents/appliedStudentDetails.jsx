@@ -35,6 +35,22 @@ function DetailTile({ label, value }) {
   );
 }
 
+function ProfilePhotoPanel({ url, name }) {
+  if (!url) return null;
+
+  return (
+    <div className="rounded-2xl border border-portal-border bg-white p-4 shadow-sm sm:col-span-2">
+      <p className="text-[10px] font-black uppercase tracking-wide text-portal-muted">Profile Photo</p>
+      <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-center">
+        <img className="h-32 w-32 rounded-2xl border border-portal-border object-cover shadow-sm" src={url} alt={`${name || "Student"} profile`} />
+        <a className="secondary-btn w-fit" href={url} target="_blank" rel="noreferrer">
+          <Link2 className="h-4 w-4" /> Open Photo
+        </a>
+      </div>
+    </div>
+  );
+}
+
 function Section({ icon: Icon, title, subtitle, tone, children }) {
   return (
     <section className="rounded-3xl border border-portal-border bg-white p-5 shadow-[0_12px_34px_rgba(15,23,42,0.08)]">
@@ -96,6 +112,7 @@ export default function AppliedStudentDetails({ application }) {
 
       <Section icon={UserRound} title="Student Profile" subtitle="Personal and contact information submitted with the application." tone="border-blue-100 bg-blue-50 text-blue-700">
         <div className="grid gap-4 sm:grid-cols-2">
+          <ProfilePhotoPanel url={profile.profilePhoto} name={application.student || profile.name} />
           <DetailTile label="Name" value={application.student || profile.name} />
           <DetailTile label="Email" value={application.email || profile.email} />
           <DetailTile label="Mobile" value={profile.mobile} />
@@ -150,7 +167,6 @@ export default function AppliedStudentDetails({ application }) {
         <div className="grid gap-4 sm:grid-cols-2">
           <DetailTile label="Resume Used" value={application.resume} />
           <DetailTile label="Profile Resume" value={profile.resume} />
-          <DetailTile label="Profile Photo" value={profile.profilePhoto} />
           <DetailTile label="Github" value={social.github ? <span className="inline-flex items-center gap-2"><Link2 className="h-4 w-4" />{social.github}</span> : ""} />
           <DetailTile label="LinkedIn" value={social.linkedin ? <span className="inline-flex items-center gap-2"><Link2 className="h-4 w-4" />{social.linkedin}</span> : ""} />
           <DetailTile label="Portfolio" value={social.portfolio ? <span className="inline-flex items-center gap-2"><Link2 className="h-4 w-4" />{social.portfolio}</span> : ""} />

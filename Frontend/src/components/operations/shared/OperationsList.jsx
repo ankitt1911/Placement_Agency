@@ -28,6 +28,7 @@ const resolveActionValue = (value, row) => typeof value === "function" ? value(r
 const getPrimaryText = (row, columns) => row.role || row.name || row.student || row.company || row[columns[0]?.key] || "Record";
 const getSecondaryText = (row) => [row.company, row.college, row.location, row.industry].filter(Boolean).slice(0, 2).join(" • ");
 const isMetricValue = (value) => typeof value === "number" || (/^\d+(\.\d+)?$/.test(String(value)) && String(value).length <= 6);
+const getProfilePhoto = (row) => row.profilePhoto || row.studentProfile?.profilePhoto || "";
 
 export default function OperationsList({
   title,
@@ -227,6 +228,7 @@ export default function OperationsList({
                 const primary = primaryText ? primaryText(row) : getPrimaryText(row, columns);
                 const inlineMeta = primaryMeta ? primaryMeta(row) : "";
                 const secondary = getSecondaryText(row);
+                const profilePhoto = getProfilePhoto(row);
                 const details = columns.filter((column) => column.key !== "status" && column.key !== "logo" && !hiddenListKeys.includes(column.key)).slice(0, 6);
                 const metrics = columns.filter((column) => column.key !== "status" && isMetricValue(row[column.key])).slice(0, 5);
 
@@ -245,7 +247,13 @@ export default function OperationsList({
                               aria-label={`Select ${primary}`}
                             />
                           ) : null}
-                          <span className="listing-icon"><UserRound className="h-4 w-4" /></span>
+                          <span className="listing-icon overflow-hidden">
+                            {profilePhoto ? (
+                              <img className="h-full w-full object-cover" src={profilePhoto} alt="" />
+                            ) : (
+                              <UserRound className="h-4 w-4" />
+                            )}
+                          </span>
                           <h2 className="max-w-md truncate text-base font-extrabold text-portal-ink">{primary}</h2>
                           {inlineMeta ? <span className="max-w-xs truncate text-xs font-semibold text-portal-muted">{inlineMeta}</span> : null}
                           {showIdChip && row.id ? <span className="listing-chip">Id: <span className="font-black italic">{row.id}</span></span> : null}

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Download, FileText, X } from "lucide-react";
+import { Download, ExternalLink, FileText, Wand2, X } from "lucide-react";
 import { downloadBlob } from "../../Utlis/Common/commonMethod";
 import CustomButton from "../custom/customButton";
 
@@ -11,6 +11,7 @@ export default function ResumePreviewModal({ target, onClose, onDownloaded }) {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [mode, setMode] = useState("choice");
   // The loader closes over the row, so it changes identity on every parent
   // render; keeping it in a ref lets the effect depend only on the candidate.
   const loadRef = useRef(null);
@@ -18,7 +19,14 @@ export default function ResumePreviewModal({ target, onClose, onDownloaded }) {
   const targetKey = target?.key || "";
 
   useEffect(() => {
-    if (!targetKey) return undefined;
+    setMode("choice");
+    setBlob(null);
+    setUrl("");
+    setError("");
+  }, [targetKey]);
+
+  useEffect(() => {
+    if (!targetKey || mode !== "generate") return undefined;
     let active = true;
     let objectUrl = "";
     setLoading(true);
@@ -42,13 +50,19 @@ export default function ResumePreviewModal({ target, onClose, onDownloaded }) {
       active = false;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [targetKey]);
+  }, [targetKey, mode]);
 
   if (!target) return null;
 
   const confirmDownload = () => {
     downloadBlob(blob, target.fileName);
     onDownloaded?.();
+    onClose();
+  };
+
+  const openUploadedResume = () => {
+    if (!target.uploadedResumeUrl) return;
+    globalThis.open(target.uploadedResumeUrl, "_blank", "noopener,noreferrer");
     onClose();
   };
 
@@ -71,7 +85,32 @@ export default function ResumePreviewModal({ target, onClose, onDownloaded }) {
           </button>
         </div>
         <div className="modal-body min-h-0 flex-1 overflow-y-auto">
-          {loading ? (
+          {mode === "choice" ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <button
+                className="rounded-xl border border-brand-100 bg-brand-50 p-5 text-left transition hover:border-brand-300 hover:bg-white hover:shadow-sm"
+                onClick={() => setMode("generate")}
+              >
+                <span className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-white text-brand-700 shadow-sm">
+                  <Wand2 className="h-5 w-5" />
+                </span>
+                <span className="mt-4 block text-base font-extrabold text-portal-ink">Generate Resume</span>
+                <span className="mt-2 block text-sm font-medium leading-6 text-portal-muted">Build and preview a PDF from the student profile.</span>
+              </button>
+              <button
+                className="rounded-xl border border-portal-border bg-slate-50 p-5 text-left transition enabled:hover:border-brand-300 enabled:hover:bg-white enabled:hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-55"
+                onClick={openUploadedResume}
+                disabled={!target.uploadedResumeUrl}
+              >
+                <span className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-white text-brand-700 shadow-sm">
+                  <ExternalLink className="h-5 w-5" />
+                </span>
+                <span className="mt-4 block text-base font-extrabold text-portal-ink">Open Uploaded Resume Link</span>
+                <span className="mt-2 block text-sm font-medium leading-6 text-portal-muted">{target.uploadedResumeUrl ? "Open the student's saved resume link in a new tab." : "No uploaded resume link is saved for this candidate."}</span>
+              </button>
+            </div>
+          ) : null}
+          {mode === "generate" && loading ? (
             <div className="flex h-[62vh] items-center justify-center rounded-2xl border border-portal-border bg-portal-canvas">
               <div className="flex flex-col items-center gap-3">
                 <div className="h-10 w-10 animate-spin rounded-full border-4 border-portal-blush border-t-portal-pink" />
@@ -79,12 +118,12 @@ export default function ResumePreviewModal({ target, onClose, onDownloaded }) {
               </div>
             </div>
           ) : null}
-          {!loading && error ? (
+          {mode === "generate" && !loading && error ? (
             <div className="modal-section modal-section-highlight">
               <p className="text-sm font-medium leading-6 text-portal-ink">{error}</p>
             </div>
           ) : null}
-          {!loading && !error && url ? (
+          {mode === "generate" && !loading && !error && url ? (
             <iframe
               title={`${target.title} resume preview`}
               src={`${url}#toolbar=0&navpanes=0&view=FitH`}
@@ -93,9 +132,9 @@ export default function ResumePreviewModal({ target, onClose, onDownloaded }) {
           ) : null}
           <div className="mt-5 flex flex-wrap justify-end gap-2">
             <CustomButton variant="secondary" onClick={onClose}>Cancel</CustomButton>
-            <CustomButton onClick={confirmDownload} disabled={!blob}>
+            {mode === "generate" ? <CustomButton onClick={confirmDownload} disabled={!blob}>
               <Download className="h-4 w-4" /> Download PDF
-            </CustomButton>
+            </CustomButton> : null}
           </div>
         </div>
       </div>

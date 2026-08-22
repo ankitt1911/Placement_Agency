@@ -84,7 +84,7 @@ export default function StudentOpenings() {
         </>
       )}
       <DetailModal open={Boolean(selected)} title={selected?.role} subtitle={selected?.company} onClose={() => setSelected(null)}>
-        {detailsLoading ? <div className="py-10 text-center text-sm font-semibold text-portal-muted">Loading opening details...</div> : <OpeningDetails opening={selected} />}
+        {detailsLoading ? <div className="py-10 text-center text-sm font-semibold text-portal-muted">Loading opening details...</div> : <OpeningDetails opening={selected} showVacancies={false} />}
       </DetailModal>
       <ApplyJobModal open={Boolean(applyTarget)} opening={applyTarget} onClose={() => setApplyTarget(null)} onConfirm={apply} loading={applying} />
     </div>

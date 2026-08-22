@@ -110,7 +110,8 @@ export const mapApplication = (application = {}) => {
     college: application.student?.academicDetails?.college || "",
     cgpa: application.student?.academicDetails?.cgpa || "",
     backlogs: application.student?.academicDetails?.activeBacklogs || 0,
-    resume: application.resumeUsed || "resume.pdf",
+    resume: application.resumeUsed || application.student?.resume || "",
+    profilePhoto: application.student?.profilePhoto || "",
     status: application.status || "Applied",
     appliedFromOpenLink: Boolean(application.appliedFromOpenLink),
     appliedDate: (application.appliedAt || application.createdAt || "").slice(0, 10),
@@ -183,7 +184,8 @@ export const mapStudent = (profile = {}) => ({
   skills: join(profile.technicalSkills),
   passingYear: profile.academicDetails?.passingYear || "",
   status: profile.user?.isActive === false ? "Disabled" : "Active",
-  resume: profile.resume || "resume.pdf"
+  profilePhoto: profile.profilePhoto || "",
+  resume: profile.resume || ""
 });
 
 export const mapIssue = (issue = {}) => ({
@@ -252,6 +254,7 @@ export const mapProfileToUi = (profile = {}) => ({
   },
   experience: {
     totalExperience: profile.totalExperience ?? "",
+    companyName: profile.companyName || "",
     projects: profile.projects || [],
     internships: profile.internships || [],
     achievements: join(profile.achievements),
@@ -298,9 +301,12 @@ export const mapProfileToApi = (profile = {}) => ({
   }),
   achievements: split(profile.experience?.achievements),
   totalExperience: numberOrUndefined(profile.experience?.totalExperience),
+  companyName: profile.experience?.companyName,
   projects: profile.experience?.projects || [],
   internships: profile.experience?.internships || [],
   certifications: profile.experience?.certifications || [],
+  profilePhoto: profile.uploads?.profilePhoto,
+  resume: profile.uploads?.resume,
   socialLinks: profile.links,
   preferredLocation: split(profile.preferences?.preferredLocation),
   expectedSalary: Number(profile.preferences?.expectedSalary) || undefined,

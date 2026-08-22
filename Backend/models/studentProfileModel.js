@@ -43,6 +43,7 @@ const studentProfileSchema = new mongoose.Schema({
   projects: [{ title: String, description: String, technologies: [String], link: String }],
   internships: [{ company: String, role: String, duration: String, description: String }],
   totalExperience: Number,
+  companyName: String,
   achievements: [String],
   certifications: [{ name: String, issuer: String, date: Date, link: String }],
   resume: String,

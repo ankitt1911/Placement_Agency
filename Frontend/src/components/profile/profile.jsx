@@ -62,7 +62,7 @@ export default function Profile() {
     { label: "Personal", value: profile?.personal?.name || "Add your name", icon: UserRoundCheck },
     { label: "Academics", value: profile?.academic?.branch || "Add branch", icon: GraduationCap },
     { label: "Skills", value: profile?.skills?.technicalSkills || "Add skills", icon: Sparkles },
-    { label: "Resume", value: profile?.uploads?.resume || "Upload pending", icon: FileText }
+    { label: "Resume", value: profile?.uploads?.resume || "Link pending", icon: FileText }
   ];
 
   const validate = () => {
@@ -97,6 +97,8 @@ export default function Profile() {
       portfolio: isUrl(profile.links.portfolio),
       github: isUrl(profile.links.github),
       linkedin: isUrl(profile.links.linkedin),
+      resume: isUrl(profile.uploads.resume),
+      profilePhoto: isUrl(profile.uploads.profilePhoto),
       expectedSalary: isSalary(profile.preferences.expectedSalary)
     };
     setErrors(next);
@@ -109,6 +111,7 @@ export default function Profile() {
     try {
       const updatedProfile = await handleUpdateProfile(profile);
       if (!updatedProfile) return;
+      setProfile(updatedProfile);
       SuccessMessage("Profile saved");
       globalThis.dispatchEvent(new globalThis.Event("student-profile-updated"));
     } finally {
@@ -124,8 +127,12 @@ export default function Profile() {
         <div className="relative bg-gradient-to-br from-white via-blue-50 to-brand-50 px-5 py-6 sm:px-6 lg:px-8 lg:py-8">
           <div className="relative flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
             <div className="flex min-w-0 flex-col gap-5 md:flex-row md:items-center">
-              <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl border border-white bg-blue-600 text-3xl font-black text-white shadow-[0_18px_34px_rgba(37,99,235,0.25)]">
-                {(profile.personal.name || "S").slice(0, 1).toUpperCase()}
+              <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white bg-blue-600 text-3xl font-black text-white shadow-[0_18px_34px_rgba(37,99,235,0.25)]">
+                {profile.uploads.profilePhoto ? (
+                  <img className="h-full w-full object-cover" src={profile.uploads.profilePhoto} alt="" />
+                ) : (
+                  (profile.personal.name || "S").slice(0, 1).toUpperCase()
+                )}
               </div>
               <div className="max-w-3xl min-w-0">
               <span className="inline-flex items-center gap-2 rounded-full border border-brand-100 bg-white/85 px-3 py-1 text-xs font-bold uppercase tracking-wide text-brand-700">
@@ -196,7 +203,7 @@ export default function Profile() {
           <ExperienceProjectsForm data={profile.experience} onChange={(field, value) => updateSection("experience", field, value)} errors={errors} />
         </div>
         <aside className="grid content-start gap-5">
-          <ResumeDocumentsForm uploads={profile.uploads} onUpload={(field, file) => updateSection("uploads", field, file?.name || "")} />
+          <ResumeDocumentsForm uploads={profile.uploads} errors={errors} onChange={(field, value) => updateSection("uploads", field, value)} />
           <SocialPreferencesForm links={profile.links} preferences={profile.preferences} onLinksChange={(field, value) => updateSection("links", field, value)} onPreferencesChange={(field, value) => updateSection("preferences", field, value)} errors={errors} />
           <HeardAboutForm data={profile.heardAbout} onChange={(field, value) => updateSection("heardAbout", field, value)} />
         </aside>

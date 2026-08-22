@@ -29,7 +29,7 @@ function DetailTile({ label, value }) {
   );
 }
 
-export default function OpeningDetails({ opening }) {
+export default function OpeningDetails({ opening, showVacancies = true }) {
   if (!opening) return null;
 
   const skills = splitList(opening.skills || opening.eligibility);
@@ -77,7 +77,7 @@ export default function OpeningDetails({ opening }) {
       </section>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <FactCard label="Vacancies" value={opening.vacancies || "-"} icon={UsersRound} tone="border-blue-100 bg-blue-50 text-blue-700" />
+        {showVacancies ? <FactCard label="Vacancies" value={opening.vacancies || "-"} icon={UsersRound} tone="border-blue-100 bg-blue-50 text-blue-700" /> : null}
         <FactCard label="Experience" value={opening.experience ? `${opening.experience} years` : "-"} icon={Award} tone="border-purple-100 bg-purple-50 text-purple-700" />
         <FactCard label="Mode" value={opening.jobType || "-"} icon={BriefcaseBusiness} tone="border-amber-100 bg-amber-50 text-amber-700" />
         <FactCard label="Category" value={opening.category || "-"} icon={BriefcaseBusiness} tone="border-emerald-100 bg-emerald-50 text-emerald-700" />
@@ -126,7 +126,6 @@ export default function OpeningDetails({ opening }) {
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           {eligibilityRows.map(([label, value]) => <DetailTile key={label} label={label} value={value} />)}
           <DetailTile label="Posted On" value={opening.postedDate} />
-          <DetailTile label="Updated On" value={opening.updatedDate} />
         </div>
       </section>
 

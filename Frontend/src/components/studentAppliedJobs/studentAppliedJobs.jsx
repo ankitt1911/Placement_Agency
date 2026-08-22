@@ -74,7 +74,7 @@ export default function StudentAppliedJobs({ openLinkOnly = false }) {
         </>
       )}
       <DetailModal open={Boolean(selected)} title={selected?.role} subtitle={selected?.company} onClose={() => setSelected(null)}>
-        {detailsLoading ? <div className="py-10 text-center text-sm font-semibold text-portal-muted">Loading opening details...</div> : <OpeningDetails opening={selected?.opening} />}
+        {detailsLoading ? <div className="py-10 text-center text-sm font-semibold text-portal-muted">Loading opening details...</div> : <OpeningDetails opening={selected?.opening} showVacancies={false} />}
       </DetailModal>
       <WithdrawApplicationModal open={Boolean(withdrawTarget)} application={withdrawTarget} onClose={() => setWithdrawTarget(null)} onConfirm={withdraw} loading={withdrawing} />
     </div>

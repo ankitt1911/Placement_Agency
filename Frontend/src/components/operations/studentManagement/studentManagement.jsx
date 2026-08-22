@@ -86,6 +86,7 @@ export default function StudentManagement() {
               title: row.name || "Student",
               subtitle: [row.college, row.branch].filter(Boolean).join(" • ") || "Review the generated resume before downloading.",
               fileName: resumeFileName(row.name),
+              uploadedResumeUrl: row.resume,
               load: () => handleGenerateStudentResume(row.id)
             })
           }
