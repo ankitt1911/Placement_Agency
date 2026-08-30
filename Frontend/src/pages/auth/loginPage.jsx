@@ -193,6 +193,12 @@ export default function LoginPage() {
                 </span>
               </label>
 
+              <div className="flex justify-end">
+                <Link className="text-sm font-bold text-[#F43F5E] transition hover:text-[#2B0A2E]" to="/forgot-password">
+                  Forgot password?
+                </Link>
+              </div>
+
               <CustomButton loading={loading} className="min-h-12 w-full rounded-full bg-[#0A0A0A] text-white shadow-[0_18px_34px_rgba(10,10,10,0.18)] transition hover:-translate-y-0.5 hover:bg-[#2B0A2E] hover:shadow-[0_24px_48px_rgba(43,10,46,0.22)]">
                 <span>{loading ? "Signing in" : "Login"}</span>
                 {!loading ? <ArrowRight size={17} /> : null}

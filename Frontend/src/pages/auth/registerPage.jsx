@@ -81,10 +81,15 @@ export default function RegisterPage() {
         ErrorMessage("Registration failed");
         return;
       }
-      SuccessMessage(response.syncedApplications
-        ? `Registration successful. We synced ${response.syncedApplications} application(s) you submitted earlier. Please login.`
-        : "Registration successful. Please login.");
-      navigate("/login", { replace: true });
+      SuccessMessage("Verification OTP sent to your email.");
+      navigate("/verify-otp", {
+        replace: true,
+        state: {
+          email: response.email || form.email,
+          expiresAt: response.expiresAt,
+          syncedApplications: response.syncedApplications || 0,
+        },
+      });
     } finally {
       setLoading(false);
     }

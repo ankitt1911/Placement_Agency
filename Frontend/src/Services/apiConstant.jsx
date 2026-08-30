@@ -1,6 +1,11 @@
 export const apiConstant = {
   health: "/health",
   register: "/auth/register",
+  verifySignupOtp: "/auth/verify-signup-otp",
+  resendSignupOtp: "/auth/resend-signup-otp",
+  forgotPassword: "/auth/forgot-password",
+  verifyForgotPasswordOtp: "/auth/verify-forgot-password-otp",
+  resetPassword: "/auth/reset-password",
   logIn: "/auth/login",
   changePassword: "/auth/change-password",
   refreshToken: "/auth/refresh-token",

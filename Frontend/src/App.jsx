@@ -7,7 +7,9 @@ import { checkAuth } from "./ReduxFeature/Authenthicate/LoginSlice";
 import { roleHome } from "./components/layouts/navigationConfig";
 import LandingPage from "./landingPage/LandingPage";
 import LoginPage from "./pages/auth/loginPage";
+import ForgotPasswordPage from "./pages/auth/forgotPasswordPage";
 import RegisterPage from "./pages/auth/registerPage";
+import VerifyOtpPage from "./pages/auth/verifyOtpPage";
 import StudentDashboardPage from "./pages/dashboard/studentDashboardPage";
 import AppliedStudentsPage from "./pages/operations/appliedStudentsPage";
 import CompanyManagementPage from "./pages/operations/companyManagementPage";
@@ -47,8 +49,16 @@ export default function App() {
           element={isAuthChecked && isAuthenticated && roleHome[role] ? <Navigate to={roleHome[role]} replace /> : <LoginPage />}
         />
         <Route
+          path="/forgot-password"
+          element={isAuthChecked && isAuthenticated && roleHome[role] ? <Navigate to={roleHome[role]} replace /> : <ForgotPasswordPage />}
+        />
+        <Route
           path="/register"
           element={isAuthChecked && isAuthenticated && roleHome[role] ? <Navigate to={roleHome[role]} replace /> : <RegisterPage />}
+        />
+        <Route
+          path="/verify-otp"
+          element={isAuthChecked && isAuthenticated && roleHome[role] ? <Navigate to={roleHome[role]} replace /> : <VerifyOtpPage />}
         />
         <Route path="/open-link/:id" element={<OpenLinkApplicationPage />} />
         <Route element={<ProtectedLayout allowedRole="student" />}>

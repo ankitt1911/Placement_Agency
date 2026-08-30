@@ -3,6 +3,11 @@ import apiRequest from "./apiService";
 
 export const HealthApi = () => apiRequest(apiConstant.health, "Get");
 export const RegisterApi = (params) => apiRequest(apiConstant.register, "Post", params, true);
+export const VerifySignupOtpApi = (params) => apiRequest(apiConstant.verifySignupOtp, "Post", params, true);
+export const ResendSignupOtpApi = (params) => apiRequest(apiConstant.resendSignupOtp, "Post", params, true);
+export const ForgotPasswordApi = (params) => apiRequest(apiConstant.forgotPassword, "Post", params, true);
+export const VerifyForgotPasswordOtpApi = (params) => apiRequest(apiConstant.verifyForgotPasswordOtp, "Post", params, true);
+export const ResetPasswordApi = (params) => apiRequest(apiConstant.resetPassword, "Post", params, true);
 export const LoginApi = (params) => apiRequest(apiConstant.logIn, "Post", params, true);
 export const ChangePasswordApi = (params) => apiRequest(apiConstant.changePassword, "Patch", params, true);
 export const RefreshTokenApi = () => apiRequest(apiConstant.refreshToken, "Post", {}, true);

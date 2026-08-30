@@ -1,4 +1,14 @@
-import { ChangePasswordApi, LoginApi, LogoutApi, RegisterApi } from "../apiMethod";
+import {
+  ChangePasswordApi,
+  ForgotPasswordApi,
+  LoginApi,
+  LogoutApi,
+  RegisterApi,
+  ResendSignupOtpApi,
+  ResetPasswordApi,
+  VerifyForgotPasswordOtpApi,
+  VerifySignupOtpApi,
+} from "../apiMethod";
 
 const handleLogin = async (params) => {
   try {
@@ -27,6 +37,60 @@ const handleRegister = async (params) => {
   }
 };
 
+const handleVerifySignupOtp = async (params) => {
+  try {
+    const response = await VerifySignupOtpApi({ email: params.email, otp: params.otp });
+    return response?.data || response?.raw?.data || null;
+  } catch (error) {
+    console.error("Error during signup OTP verification:", error);
+    return null;
+  }
+};
+
+const handleResendSignupOtp = async (params) => {
+  try {
+    const response = await ResendSignupOtpApi({ email: params.email });
+    return response?.data || response?.raw?.data || null;
+  } catch (error) {
+    console.error("Error during signup OTP resend:", error);
+    return null;
+  }
+};
+
+const handleForgotPassword = async (params) => {
+  try {
+    const response = await ForgotPasswordApi({ email: params.email });
+    return response?.data || response?.raw?.data || null;
+  } catch (error) {
+    console.error("Error during forgot password:", error);
+    return null;
+  }
+};
+
+const handleVerifyForgotPasswordOtp = async (params) => {
+  try {
+    const response = await VerifyForgotPasswordOtpApi({ email: params.email, otp: params.otp });
+    return response?.data || response?.raw?.data || null;
+  } catch (error) {
+    console.error("Error during forgot password OTP verification:", error);
+    return null;
+  }
+};
+
+const handleResetPassword = async (params) => {
+  try {
+    await ResetPasswordApi({
+      email: params.email,
+      newPassword: params.newPassword,
+      confirmPassword: params.confirmPassword,
+    });
+    return true;
+  } catch (error) {
+    console.error("Error during password reset:", error);
+    return false;
+  }
+};
+
 // The api interceptor already toasts the server message on failure, so only the outcome is reported back.
 const handleChangePassword = async (params) => {
   try {
@@ -41,4 +105,15 @@ const handleChangePassword = async (params) => {
   }
 };
 
-export { handleLogin, handleLogout, handleGetCurrentUser, handleRegister, handleChangePassword };
+export {
+  handleLogin,
+  handleLogout,
+  handleGetCurrentUser,
+  handleRegister,
+  handleVerifySignupOtp,
+  handleResendSignupOtp,
+  handleForgotPassword,
+  handleVerifyForgotPasswordOtp,
+  handleResetPassword,
+  handleChangePassword,
+};
